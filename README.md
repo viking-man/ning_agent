@@ -1,2 +1,3 @@
-# ning_agent
-self agent
+# 宁宁小助理 Ning_Agent
+剧本流助理，所有功能按照剧本模式编写，整体脉络和功能走向固定，大模型在部分功能上自主发挥。
+结合TTS、whisper、chatglm、langchain实现定制化助理功能，包括问答、唱歌、搜索等功能。
