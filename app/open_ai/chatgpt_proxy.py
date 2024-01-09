@@ -8,7 +8,7 @@ from app import db
 import json
 from openai import OpenAI
 
-client = OpenAI(api_key="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")
+client = OpenAI(api_key=)
 
 
 def text_chat(user_message, user_id, chat_id, gpt_version):
