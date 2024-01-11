@@ -7,8 +7,28 @@ import openai
 from app import db
 import json
 from openai import OpenAI
+import os
+from dotenv import load_dotenv
 
-client = OpenAI(api_key=)
+# 加载环境变量
+load_dotenv('../../.flaskenv',override=True)
+
+# 获取环境变量
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
+client = OpenAI(api_key=OPENAI_API_KEY)
+
+# if __name__ == "__main__":
+#     print(OPENAI_API_KEY)
+#     chat_history = []
+#     chat_history.append({"role": "system",
+#                          "content": "I love you"})
+#     response = client.chat.completions.create(
+#         model='gpt-3.5-turbo-0613',
+#         messages=chat_history,
+#         temperature=0
+#     )
+#     print(response)
 
 
 def text_chat(user_message, user_id, chat_id, gpt_version):
