@@ -18,18 +18,6 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-# if __name__ == "__main__":
-#     print(OPENAI_API_KEY)
-#     chat_history = []
-#     chat_history.append({"role": "system",
-#                          "content": "I love you"})
-#     response = client.chat.completions.create(
-#         model='gpt-3.5-turbo-0613',
-#         messages=chat_history,
-#         temperature=0
-#     )
-#     print(response)
-
 
 def text_chat(user_message, user_id, chat_id, gpt_version):
     gpt_model = ChatGPTModel.get_value(gpt_version)
