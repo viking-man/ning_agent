@@ -19,14 +19,19 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 
-def text_chat(user_message, user_id, chat_id, gpt_version):
-    gpt_model = ChatGPTModel.get_value(gpt_version)
+def get_chathistory(user_id, chat_id, gpt_version):
     # 查询聊天记录
     chat_record = Chat.query.filter_by(chat_id=chat_id).filter_by(user_id=user_id).first()
     if chat_record is None:
         chat_history = []
     else:
         chat_history = json.loads(chat_record.chat_history)
+        
+    return chat_history
+
+def text_chat(user_message, user_id, chat_id, gpt_version):
+    chat_history = get_chathistory(user_id, chat_id, gpt_version)
+    gpt_model = ChatGPTModel.get_value(gpt_version)
 
     # request openai
     ai_message, chat_history = requestOpenai(user_message, chat_history, gpt_model)
