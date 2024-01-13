@@ -121,7 +121,7 @@ class DeepAgent:
 
 
 if __name__ == "__main__":
-    from custom_llm import CustomLLM
+    from ..agent.agent_llm import CustomLLM
 
     llm = CustomLLM()
     tools = [

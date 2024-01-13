@@ -3,7 +3,7 @@ import os
 MODEL_NAME = 'chatglm'
 REMOTE_MODEL_PATH = ''
 LOCAL_MODEL_PATH=os.path.join("G:\data\\transformers\source\chatglm\model")
-LOCAL_CONTENT = os.path.join(os.path.dirname(__file__), "../resources/docs")
+LOCAL_CONTENT = os.path.join(os.path.dirname(__file__), "../../resources/docs")
 # PHILOSOPHY_LOCAL_CONTENT = os.path.join(os.path.dirname(__file__), "../resources/docs/philosophy")
 VS_PATH = os.path.join(os.path.dirname(__file__), "vector_store\FAISS")
 CHUNK_SIZE = 1024

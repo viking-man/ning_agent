@@ -3,7 +3,7 @@ import torch.cuda
 import torch.backends
 from ..agent.agent_config import *
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-from langchain.agents import Tool
+from langchain.agents import tool
 from ..tools.web_search import GoogleSearch
 
 EMBEDDING_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
@@ -20,7 +20,7 @@ googleSearch = GoogleSearch()
 
 class RagSearch:
 
-    @Tool
+    @tool
     def search(query: str = ""):
         """This method involves researching historical and philosophical literature related to the user's question,
         providing relevant information to the AI assistant for reference during processing."""
