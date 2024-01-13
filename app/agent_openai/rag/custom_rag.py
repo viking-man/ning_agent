@@ -10,13 +10,13 @@ from langchain.chat_models import ChatOpenAI
 import datetime
 import torch
 from tqdm import tqdm
-from agent_config import *
+from ..agent.agent_config import *
 from langchain import PromptTemplate
 from langchain.memory import ConversationSummaryBufferMemory
 from langchain.chains import ConversationChain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import PyPDFLoader
-from type import ChatGPTModel
+from app.type import ChatGPTModel
 
 
 conversation_template = """你是一个正在跟某个人类对话的机器人.

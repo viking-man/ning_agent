@@ -1,5 +1,7 @@
-from agent import agent_core
+from agent.agent_core import NingAgent
 
-def dispatch(chat:str="",chat_history:str=""):
-   content =  agent_core.query(chat,chat_history)
-   return content
+ning_agent = NingAgent()
+
+def dispatch(chat: str = "", chat_history: str = ""):
+    content = ning_agent.query(chat, chat_history)
+    return content
