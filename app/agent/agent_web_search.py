@@ -1,6 +1,5 @@
 import requests
 from langchain.tools import WikipediaQueryRun
-from langchain_community.utilities import WikipediaAPIWrapper
 
 RapidAPIKey = "3b5dd7d5f5mshd78f146dc498a60p143d49jsn07023d199750"
 
@@ -41,17 +40,4 @@ class GoogleSearch:
 
             result_str = "\n".join(result_arr)
             return result_str
-
-
-class WikiSearch:
-    def search(query:str = "c "):
-        query = query.strip()
-
-        if query == "":
-            return ""
-        
-        wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
-        result = wikipedia(query)
-        
-        return result
         

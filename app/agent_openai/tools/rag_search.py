@@ -1,30 +1,31 @@
-from rag import LocalDocQA
+from ..rag.custom_rag import LocalDocQA
 import torch.cuda
 import torch.backends
-from agent_config import *
+from ..agent.agent_config import *
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from langchain.agents import Tool
-from tools import GoogleSearch
+from ..tools.web_search import GoogleSearch
 
 EMBEDDING_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 embeddings = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese",
-                                   model_kwargs={'device':EMBEDDING_DEVICE})
+                                   model_kwargs={'device': EMBEDDING_DEVICE})
 
 localDocQA = LocalDocQA(filepath=LOCAL_CONTENT,
-                    vs_path=VS_PATH,
-                    embeddings=embeddings,
-                    init=True)
+                        vs_path=VS_PATH,
+                        embeddings=embeddings,
+                        init=True)
 
-googleSearch =  GoogleSearch()
+googleSearch = GoogleSearch()
+
 
 class RagSearch:
-    
+
     @Tool
-    def search(query:str = ""):
+    def search(query: str = ""):
+        """This method involves researching historical and philosophical literature related to the user's question,
+        providing relevant information to the AI assistant for reference during processing."""
         related_content = localDocQA.query_knowledge(query=query)
         formed_related_content = "\n" + related_content
         current_content = googleSearch.search(query)
-        
-        return formed_related_content,current_content
-        
-        
+
+        return formed_related_content, current_content

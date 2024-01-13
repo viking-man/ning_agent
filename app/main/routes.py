@@ -10,7 +10,7 @@ import io
 import time
 from app import create_app
 from pathlib import Path
-from agent_openai import agent_facade
+from app.agent_openai import agent_facade
 
 app = create_app()
 

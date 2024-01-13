@@ -1,15 +1,15 @@
 from langchain.agents import Tool
 from langchain.tools import BaseTool
 from langchain import PromptTemplate, LLMChain
-from tools.web_search import GoogleSearch
-from tools.rag_search import RagSearch
+from ..tools.web_search import GoogleSearch
+from ..tools.rag_search import RagSearch
 from langchain.agents import BaseSingleActionAgent, AgentOutputParser, LLMSingleActionAgent, AgentExecutor
 from typing import List, Tuple, Any, Union, Optional, Type
 from langchain.schema import AgentAction, AgentFinish
 from langchain.prompts import StringPromptTemplate
 from langchain.callbacks.manager import CallbackManagerForToolRun
 from langchain.chat_models import ChatOpenAI
-from type import ChatGPTModel
+from app.type import ChatGPTModel
 from app.agent_openai.agent.agent_template import *
 import re
 
@@ -42,11 +42,11 @@ class CustomPromptTemplate(StringPromptTemplate):
 
 
 class CustomOutputParser(AgentOutputParser):
-    
+
     def parse(self, llm_output: str) -> Union[AgentAction, AgentFinish]:
         # 正则表达式模式，用于匹配所需的格式
         pattern = r"(Answer|Music|Video|Painting|Default)\('([^']*)'\)"
-        
+
         # 使用 re.match 检查字符串是否与模式匹配
         match = re.match(pattern, llm_output)
 
@@ -65,36 +65,36 @@ class CustomOutputParser(AgentOutputParser):
 
 class NingAgent:
     # tool_name: str = "GoogleSearch"
-    tool_names:str = ""
+    tool_names: str = ""
     agent_executor: any
     tools: List[Tool]
     llm_chain: any
 
-    def query(self, related_content: str = "", query: str = ""):
+    def query(self, chat_history: str = "", query: str = ""):
         # tool_name = self.tool_name
-        result = self.agent_executor.run(related_content="", input=query ,tool_name="")
+        result = self.agent_executor.run(chat_history=chat_history, input=query, tool_name="")
         return result
 
     def __init__(self, **kwargs):
         llm = ChatOpenAI(temperature=0, model=ChatGPTModel.GPT3.value)
         tools = [
-                    Tool.from_function(
-                        func=GoogleSearch.search,
-                        name="Default",
-                        description="Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations. The findings should be used as reference material for the large model."
-                    ),
-                    Tool.from_function(
-                        func=RagSearch.search,
-                        name="Answer",
-                        description="Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations. The findings should be used as reference material for the large model."
-                    ),
-                ]
+            Tool.from_function(
+                func=GoogleSearch.search,
+                name="Default",
+                description="Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations. The findings should be used as reference material for the large model."
+            ),
+            Tool.from_function(
+                func=RagSearch.search,
+                name="Answer",
+                description="Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations. The findings should be used as reference material for the large model."
+            ),
+        ]
         self.tools = tools
         tool_names = [tool.name for tool in tools]
         output_parser = CustomOutputParser()
         prompt = CustomPromptTemplate(template="",
                                       tools=tools,
-                                      input_variables=["related_content","tool_name", "input", "intermediate_steps"])
+                                      input_variables=["related_content", "tool_name", "input", "intermediate_steps"])
 
         llm_chain = LLMChain(llm=llm, prompt=prompt)
         self.llm_chain = llm_chain

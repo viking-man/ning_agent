@@ -10,10 +10,10 @@ from langchain.prompts import PromptTemplate
 import torch
 from langchain import HuggingFacePipeline
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, pipeline
-from agent_config import CHATGLM_MODEL_PATH
+from ..agent.agent_config import LOCAL_MODEL_PATH
 
 
-class AgentLLM(LLM):
+class CustomLLM(LLM):
     logging: bool = False
     output_keys: List[str] = ["output"]
 
@@ -34,12 +34,13 @@ class AgentLLM(LLM):
         prompt: str,
         stop: Optional[List[str]] = None,
         run_manager: Optional[CallbackManagerForLLMRun] = None,
+        **kwargs: Any,
     ) -> str:
         self.log('----------' + self._llm_type + '----------> llm._call()')
         self.log(prompt)
         print(f"prompt{prompt}")
  
-        MODEL_NAME = CHATGLM_MODEL_PATH
+        MODEL_NAME = LOCAL_MODEL_PATH
         tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
         model = AutoModelForCausalLM.from_pretrained(
             MODEL_NAME, torch_dtype=torch.float16, trust_remote_code=True, device_map="auto"
