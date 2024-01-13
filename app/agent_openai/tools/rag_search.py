@@ -19,11 +19,11 @@ googleSearch = GoogleSearch()
 
 
 class RagSearch:
+
     @Tool
     def search(query: str = ""):
         """This method involves researching historical and philosophical literature related to the user's question,
-        providing relevant information to the AI assistant for reference during processing.
-        """
+        providing relevant information to the AI assistant for reference during processing."""
         related_content = localDocQA.query_knowledge(query=query)
         formed_related_content = "\n" + related_content
         current_content = googleSearch.search(query)

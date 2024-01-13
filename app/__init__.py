@@ -32,6 +32,9 @@ def create_app(config_class=Config):
     from app.agent_openai import bp as agent_openai_bp
     app.register_blueprint(agent_openai_bp)
 
+    from app.agent import bp as agent_bp
+    app.register_blueprint(agent_bp)
+
     return app
 
 

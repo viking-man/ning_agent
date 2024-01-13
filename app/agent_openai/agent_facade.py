@@ -1,4 +1,4 @@
-from agent.agent_core import NingAgent
+from ..agent.agent_core import NingAgent
 
 ning_agent = NingAgent()
 
