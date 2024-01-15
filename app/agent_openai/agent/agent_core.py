@@ -12,6 +12,7 @@ from langchain.chat_models import ChatOpenAI
 from app.type import ChatGPTModel
 from app.agent_openai.agent.agent_template import *
 import re
+from app.open_ai.openai_config import OPENAI_API_KEY
 
 
 class CustomPromptTemplate(StringPromptTemplate):
@@ -37,7 +38,8 @@ class CustomPromptTemplate(StringPromptTemplate):
                 # todo 先默认返回空，后续再看
                 return ""
 
-        kwargs["background_infomation"] = background_infomation
+        kwargs["background_content"] = background_infomation
+        kwargs["related_content"] = background_infomation
         return template.format(**kwargs)
 
 
@@ -64,27 +66,26 @@ class CustomOutputParser(AgentOutputParser):
 
 
 class NingAgent:
-    # tool_name: str = "GoogleSearch"
     tool_names: str = ""
     agent_executor: any
     tools: List[Tool]
     llm_chain: any
 
-    def query(self, chat_history: str = "", query: str = ""):
+    def query(self, query: str = "", chat_history: str = ""):
         # tool_name = self.tool_name
         result = self.agent_executor.run(chat_history=chat_history, input=query, tool_name="")
         return result
 
     def __init__(self, **kwargs):
-        llm = ChatOpenAI(temperature=0, model=ChatGPTModel.GPT3.value)
+        llm = ChatOpenAI(temperature=0, model=ChatGPTModel.GPT3.value, openai_api_key=OPENAI_API_KEY)
         tools = [
             Tool.from_function(
-                func=GoogleSearch.search,
+                func=GoogleSearch.web_search,
                 name="Default",
                 description="Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations. The findings should be used as reference material for the large model."
             ),
             Tool.from_function(
-                func=RagSearch.search,
+                func=RagSearch.rag_search,
                 name="Answer",
                 description="Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations. The findings should be used as reference material for the large model."
             ),
@@ -94,7 +95,7 @@ class NingAgent:
         output_parser = CustomOutputParser()
         prompt = CustomPromptTemplate(template="",
                                       tools=tools,
-                                      input_variables=["related_content", "tool_name", "input", "intermediate_steps"])
+                                      input_variables=["chat_history", "input", "intermediate_steps"])
 
         llm_chain = LLMChain(llm=llm, prompt=prompt)
         self.llm_chain = llm_chain

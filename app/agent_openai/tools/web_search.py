@@ -1,5 +1,6 @@
 from langchain.agents import tool
 import requests
+from app.agent_openai.agent.agent_config import WEB_SEARCH_MAX_RESULT
 
 RapidAPIKey = "3b5dd7d5f5mshd78f146dc498a60p143d49jsn07023d199750"
 
@@ -9,7 +10,7 @@ RapidAPIKey = "3b5dd7d5f5mshd78f146dc498a60p143d49jsn07023d199750"
 class GoogleSearch:
 
     @tool
-    def search(question: str = ""):
+    def web_search(question: str = ""):
         """Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations.
         The findings should be used as reference material for the large model."""
         query = question.strip()
@@ -22,7 +23,7 @@ class GoogleSearch:
 
         url = "https://google-web-search1.p.rapidapi.com/"
 
-        querystring = {"query": query, "limit": "3", "related_keywords": "true"}
+        querystring = {"query": query, "limit": WEB_SEARCH_MAX_RESULT, "related_keywords": "true"}
 
         headers = {
             "X-RapidAPI-Key": RapidAPIKey,
@@ -38,7 +39,7 @@ class GoogleSearch:
         else:
             result_arr = []
             result_str = ""
-            for i in range(3):
+            for i in range(WEB_SEARCH_MAX_RESULT):
                 item = data_list[i]
                 title = item["title"]
                 description = item["description"]

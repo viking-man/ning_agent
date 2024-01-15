@@ -35,8 +35,8 @@ def text_chat():  # put application's code here
     # chatgpt请求
     # ai_message, chat_history = chatgpt_proxy.text_chat(user_message, user_id, chat_id, gpt_version)
     # 使用agent
-    chat_history = chatgpt_proxy.get_chathistory(user_id, chat_id, gpt_version)
-    ai_message = agent_facade.dispatch(user_message,chat_history)
+    chat_history, _ = chatgpt_proxy.get_chat_history(user_id, chat_id, gpt_version)
+    ai_message = agent_facade.dispatch(user_message, chat_history)
 
     # tts转成语音
     audio_id = gtts_proxy.convert_to_audio(user_id, chat_id, ai_message, "en")
