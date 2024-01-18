@@ -5,11 +5,11 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import UnstructuredFileLoader
 # from chinese_text_splitter import ChineseTextSplitter
 from langchain.vectorstores import FAISS
-from ..agent.agent_llm import CustomLLM
+from app.agent_chatglm.agent_llm import CustomLLM
 import datetime
 import torch
 from tqdm import tqdm
-from ..agent.agent_config import *
+from app.agent_chatglm.agent_config import *
 from langchain import PromptTemplate
 from langchain.memory import ConversationSummaryBufferMemory
 from langchain.chains import ConversationChain
@@ -155,7 +155,7 @@ class LocalDocQA:
 
     def __init__(self, filepath: str, vs_path: str, embeddings: object,
                        init: bool = True):
-        if init:
+        if init and (vs_path and (not os.path.exists(vs_path))):
             vs_path, loaded_files = init_knowledge_vector_store(filepath=LOCAL_CONTENT,
                                                                 vs_path=VS_PATH,
                                                                 embeddings=embeddings)

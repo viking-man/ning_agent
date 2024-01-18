@@ -12,6 +12,7 @@ VECTOR_SEARCH_TOP_K = 2
 os.environ["SERPAPI_API_KEY"] = "Your SerpAPI Key"
 
 WEB_SEARCH_MAX_RESULT = 2
+RAPID_API_KEY = "3b5dd7d5f5mshd78f146dc498a60p143d49jsn07023d199750"
 
 PROMPT_TEMPLATE = """已知信息：
 {context}

@@ -1,5 +1,6 @@
 import os
 
+ZHIPU_API_KEY="be6fb38cd1fb941c9e9b7504056e0383.GmDpKZ5JB4Hr5qfF"
 MODEL_NAME = 'chatglm'
 REMOTE_MODEL_PATH = ''
 LOCAL_MODEL_PATH=os.path.join("G:\data\\transformers\source\chatglm\model")

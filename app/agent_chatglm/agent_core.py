@@ -2,14 +2,14 @@
 from langchain.agents import Tool
 from langchain.tools import BaseTool
 from langchain import PromptTemplate, LLMChain
-from ..agent.agent_web_search import GoogleSearch
-from ..agent.agent_template import agent_template
+from app.agent_chatglm.agent_web_search import GoogleSearch
+from app.agent_chatglm.agent_template import agent_template
 from langchain.agents import BaseSingleActionAgent, AgentOutputParser, LLMSingleActionAgent, AgentExecutor
 from typing import List, Tuple, Any, Union, Optional, Type
 from langchain.schema import AgentAction, AgentFinish
 from langchain.prompts import StringPromptTemplate
 from langchain.callbacks.manager import CallbackManagerForToolRun
-from ..agent.agent_llm import CustomLLM
+from app.agent_chatglm.agent_llm import CustomLLM
 import re
 
 class CustomPromptTemplate(StringPromptTemplate):

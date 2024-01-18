@@ -1,12 +1,11 @@
 from langchain.agents import tool
 import requests
-from app.agent_openai.agent.agent_config import WEB_SEARCH_MAX_RESULT
-
-RapidAPIKey = "3b5dd7d5f5mshd78f146dc498a60p143d49jsn07023d199750"
+from app.agent_openai.agent.agent_config import WEB_SEARCH_MAX_RESULT, RAPID_API_KEY
+import logging
+from app.common.error import ParameterException
 
 
 # 默认的web搜索工具，查询用户输入的问题最新的网页解释，给大模型作为参考资料
-
 class GoogleSearch:
 
     @tool
@@ -18,8 +17,9 @@ class GoogleSearch:
         if query == "":
             return ""
 
-        if RapidAPIKey == "":
-            return "请配置你的 RapidAPIKey"
+        if RAPID_API_KEY == "":
+            raise ParameterException("RAPID_API_KEY", "请配置你的 RapidAPIKey")
+        RapidAPIKey = RAPID_API_KEY
 
         url = "https://google-web-search1.p.rapidapi.com/"
 
@@ -30,7 +30,9 @@ class GoogleSearch:
             "X-RapidAPI-Host": "google-web-search1.p.rapidapi.com"
         }
 
+        logging.info(f"Google.web_search request->{querystring}")
         response = requests.get(url, headers=headers, params=querystring)
+        logging.info(f"Google.web_search response->{response.json()}")
 
         data_list = response.json()['results']
 
@@ -38,7 +40,6 @@ class GoogleSearch:
             return ""
         else:
             result_arr = []
-            result_str = ""
             for i in range(WEB_SEARCH_MAX_RESULT):
                 item = data_list[i]
                 title = item["title"]

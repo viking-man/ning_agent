@@ -1,8 +1,7 @@
 from langchain.agents import Tool
-from langchain.tools import BaseTool
 from langchain import PromptTemplate, LLMChain
-from ..tools.web_search import GoogleSearch
-from ..tools.rag_search import RagSearch
+from app.agent_openai.tools.web_search import GoogleSearch
+from app.agent_openai.tools.rag_search import RagSearch
 from langchain.agents import BaseSingleActionAgent, AgentOutputParser, LLMSingleActionAgent, AgentExecutor
 from typing import List, Tuple, Any, Union, Optional, Type
 from langchain.schema import AgentAction, AgentFinish
@@ -12,7 +11,10 @@ from langchain.chat_models import ChatOpenAI
 from app.type import ChatGPTModel
 from app.agent_openai.agent.agent_template import *
 import re
-from app.open_ai.openai_config import OPENAI_API_KEY
+from app.open_ai.openai_config import OPENAI_API_KEY, TAVILY_API_KEY
+from langchain.agents import AgentExecutor, create_react_agent
+from langchain_community.tools.tavily_search import TavilySearchResults
+from langchain import hub
 
 
 class CustomPromptTemplate(StringPromptTemplate):
@@ -65,6 +67,49 @@ class CustomOutputParser(AgentOutputParser):
             return AgentAction(tool=action, tool_input=action_input.strip(" ").strip('"'), log=llm_output)
 
 
+class Ning2Agent:
+    tools: any
+    ning_agent: any
+    prompt: any
+    llm: any
+    agent_executor: any
+
+    def __init__(self):
+        self.tools = [TavilySearchResults(max_results=1)]
+        print(str(self.tools))
+        # self.tools = [
+        #     Tool.from_function(
+        #         func=GoogleSearch.web_search,
+        #         name="Default",
+        #         description="Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations. The findings should be used as reference material for the large model."
+        #     ),
+        #     Tool.from_function(
+        #         func=RagSearch.rag_search,
+        #         name="RagRetrieve",
+        #         description="This method involves researching historical literature related to the user's question,providing relevant information to the AI assistant for reference during processing."
+        #     ),
+        # ]
+        # self.prompt = langchain_generate_template
+        # Get the prompt to use - you can modify this!
+        self.prompt = hub.pull("hwchase17/react")
+        print(self.prompt)
+        # self.prompt = PromptTemplate(
+        #     template=langchain_generate_template,
+        #     input_variables=['input']
+        # )
+        # Choose the LLM to use
+        self.llm = ChatOpenAI(temperature=0, model=ChatGPTModel.GPT3.value, openai_api_key=OPENAI_API_KEY)
+
+        # Construct the ReAct agent
+        self.agent = create_react_agent(self.llm, self.tools, self.prompt)
+        # Create an agent executor by passing in the agent and tools
+        self.agent_executor = AgentExecutor(agent=self.agent, tools=self.tools, verbose=True)
+
+    def query(self, input):
+        result = self.agent_executor.invoke({"input": input})
+        return result
+
+
 class NingAgent:
     tool_names: str = ""
     agent_executor: any
@@ -86,8 +131,8 @@ class NingAgent:
             ),
             Tool.from_function(
                 func=RagSearch.rag_search,
-                name="Answer",
-                description="Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations. The findings should be used as reference material for the large model."
+                name="RagRetrieve",
+                description="This method involves researching historical literature related to the user's question,providing relevant information to the AI assistant for reference during processing."
             ),
         ]
         self.tools = tools
@@ -109,3 +154,11 @@ class NingAgent:
 
         agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True)
         self.agent_executor = agent_executor
+
+
+if __name__ == "__main__":
+    import langchain
+    langchain.debug = True
+    ning_agent = Ning2Agent()
+    result = ning_agent.query("生命起源")
+    print(result)

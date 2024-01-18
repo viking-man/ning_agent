@@ -10,7 +10,7 @@ from langchain.prompts import PromptTemplate
 import torch
 from langchain import HuggingFacePipeline
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, pipeline
-from ..agent.agent_config import LOCAL_MODEL_PATH
+from app.agent_chatglm.agent_config import LOCAL_MODEL_PATH
 
 
 class CustomLLM(LLM):
