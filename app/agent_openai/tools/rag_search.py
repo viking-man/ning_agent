@@ -23,7 +23,7 @@ class RagSearch:
 
     @tool
     def rag_search(query: str = ""):
-        """This method involves researching historical literature related to the user's question,
+        """This method involves researching historical information related to the user's question,
         providing relevant information to the AI assistant for reference during processing."""
         related_content = localDocQA.query_knowledge(query=query)
         formed_related_content = "\n" + related_content
