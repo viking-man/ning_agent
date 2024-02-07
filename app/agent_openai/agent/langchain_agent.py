@@ -4,6 +4,9 @@ from app.type import ChatGPTModel
 from app.open_ai.openai_config import OPENAI_API_KEY
 from app.agent_openai.tools.web_search import GoogleSearch
 from app.agent_openai.tools.rag_search import RagSearch
+from app.agent_openai.tools.spotify_search import SpotifySearch
+from app.agent_openai.tools.youtube_search import YoutubeSearch
+from app.agent_openai.tools.bilibili_search import BilibiliSearch
 from typing import List, Tuple, Any, Union, Optional, Type
 import logging
 
@@ -21,6 +24,16 @@ class LangchainAgent:
             Tool.from_function(
                 func=GoogleSearch.web_search,
                 name="Default",
+                description="Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations. The findings should be used as reference material for the large model."
+            ),
+            Tool.from_function(
+                func=RagSearch.rag_search,
+                name="Answer",
+                description="This method involves researching historical information related to the user's question, providing relevant information to the AI assistant for reference during processing."
+            ),
+            Tool.from_function(
+                func=SpotifySearch.search_download_songs,
+                name="Answer",
                 description="Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations. The findings should be used as reference material for the large model."
             ),
             Tool.from_function(
@@ -46,6 +59,7 @@ class LangchainAgent:
 
 if __name__ == "__main__":
     import langchain
+
     langchain.debug = True
     print(OPENAI_API_KEY)
     agent = LangchainAgent()

@@ -1,0 +1,6 @@
+GPT_MODEL_PATH = "GPT_SoVITS/pretrained_models/s2G488k.pth"
+SOVITS_MODEL_PATH = "GPT_SoVITS/pretrained_models/s2G488k.pth"
+EXAMPLE_WAV = ""
+EXAMPLE_TEXT = ""
+EXAMPLE_TEXT_LANG = "zh"
+OUTPUT_WAV_PATH = ""
