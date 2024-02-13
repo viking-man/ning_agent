@@ -2,7 +2,7 @@ from gpt_tts_config import *
 import os
 import soundfile as sf
 import logging
-from GPT_SoVITS.inference_webui import change_gpt_weights, change_sovits_weights, get_tts_wav
+from GPT_SoVITS.inference_webui import InferenceWebUI
 
 
 class GptTTSProxy:
@@ -15,17 +15,17 @@ class GptTTSProxy:
         self.GPT_model_path = GPT_MODEL_PATH
         self.SoVITS_model_path = SOVITS_MODEL_PATH
 
-    def text_to_speech(text: str, lang: str):
+    def text_to_speech(text: str, lang: str, external: InferenceWebUI):
         # gpt微调权重
-        change_gpt_weights(gpt_path=GPT_MODEL_PATH)
+        external.change_gpt_weights(gpt_path=GPT_MODEL_PATH)
         # sovits微调权重
-        change_sovits_weights(sovits_path=SOVITS_MODEL_PATH)
+        external.change_sovits_weights(sovits_path=SOVITS_MODEL_PATH)
         # 生成wav
-        synthesis_result = get_tts_wav(ref_wav_path=EXAMPLE_WAV,
-                                       prompt_text=EXAMPLE_TEXT,
-                                       prompt_language=EXAMPLE_TEXT_LANG,
-                                       text=text,
-                                       text_language=lang)
+        synthesis_result = external.get_tts_wav(ref_wav_path=EXAMPLE_WAV,
+                                                prompt_text=EXAMPLE_TEXT,
+                                                prompt_language=EXAMPLE_TEXT_LANG,
+                                                text=text,
+                                                text_language=lang)
 
         result_list = list(synthesis_result)
 
@@ -41,4 +41,8 @@ class GptTTSProxy:
 
 
 if __name__ == "__main__":
-    GptTTSProxy.text_to_speech("我是宁宁，我喜欢唱歌", 'zh')
+    external = InferenceWebUI("/Users/viking/ai/develope/ning_agent/external/pretrained_models/bert_path",
+                              "/Users/viking/ai/develope/ning_agent/external/pretrained_models/cnhubert_base_path",
+                              "/Users/viking/ai/develope/ning_agent/external/pretrained_models/gpt_weights",
+                              "/Users/viking/ai/develope/ning_agent/external/pretrained_models/sovits_weights")
+    GptTTSProxy.text_to_speech("我是宁宁，我喜欢唱歌", 'zh', external)
