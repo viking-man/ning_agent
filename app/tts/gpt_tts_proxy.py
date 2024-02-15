@@ -41,8 +41,8 @@ class GptTTSProxy:
 
 
 if __name__ == "__main__":
-    external = InferenceWebUI("/Users/viking/ai/develope/ning_agent/external/pretrained_models/bert_path",
-                              "/Users/viking/ai/develope/ning_agent/external/pretrained_models/cnhubert_base_path",
-                              "/Users/viking/ai/develope/ning_agent/external/pretrained_models/gpt_weights",
-                              "/Users/viking/ai/develope/ning_agent/external/pretrained_models/sovits_weights")
+    external = InferenceWebUI("G:\data\\tts\\tool\GPT-SoVITS-beta0128\GPT_SoVITS\pretrained_models\chinese-roberta-wwm-ext-large",
+                              "G:\data\\tts\\tool\GPT-SoVITS-beta0128\GPT_SoVITS\pretrained_models\chinese-hubert-base",
+                              "G:\data\\tts\\tool\GPT-SoVITS-beta0128\GPT_weights\\ningning-e15.ckpt",
+                              "G:\data\\tts\\tool\GPT-SoVITS-beta0128\SoVITS_weights\\ningning_e8_s80.pth")
     GptTTSProxy.text_to_speech("我是宁宁，我喜欢唱歌", 'zh', external)
