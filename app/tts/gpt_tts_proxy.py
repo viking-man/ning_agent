@@ -17,9 +17,9 @@ class GptTTSProxy:
 
     def text_to_speech(text: str, lang: str, external: InferenceWebUI):
         # gpt微调权重
-        external.change_gpt_weights(gpt_path=GPT_MODEL_PATH)
+        external.change_gpt_weights(gpt_path=external.gpt_path)
         # sovits微调权重
-        external.change_sovits_weights(sovits_path=SOVITS_MODEL_PATH)
+        external.change_sovits_weights(sovits_path=external.sovits_path)
         # 生成wav
         synthesis_result = external.get_tts_wav(ref_wav_path=EXAMPLE_WAV,
                                                 prompt_text=EXAMPLE_TEXT,
