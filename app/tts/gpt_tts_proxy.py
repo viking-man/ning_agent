@@ -23,9 +23,10 @@ class GptTTSProxy:
         # 生成wav
         synthesis_result = external.get_tts_wav(ref_wav_path=EXAMPLE_WAV,
                                                 prompt_text=EXAMPLE_TEXT,
-                                                prompt_language=EXAMPLE_TEXT_LANG,
-                                                text=text,
-                                                text_language=lang)
+                                                # prompt_language=EXAMPLE_TEXT_LANG,
+                                                text=text
+                                                # text_language=lang
+                                                )
 
         result_list = list(synthesis_result)
 
@@ -41,8 +42,12 @@ class GptTTSProxy:
 
 
 if __name__ == "__main__":
-    external = InferenceWebUI("/Users/viking/ai/develope/ning_agent/external/pretrained_models/bert_path",
-                              "/Users/viking/ai/develope/ning_agent/external/pretrained_models/cnhubert_base_path",
-                              "/Users/viking/ai/develope/ning_agent/external/pretrained_models/gpt_weights",
-                              "/Users/viking/ai/develope/ning_agent/external/pretrained_models/sovits_weights")
-    GptTTSProxy.text_to_speech("我是宁宁，我喜欢唱歌", 'zh', external)
+    external = InferenceWebUI(
+        "/Users/viking/ai/github/GPT-SoVITS/GPT_SoVITS/pretrained_models/chinese-roberta-wwm-ext-large",
+        "/Users/viking/ai/github/GPT-SoVITS/GPT_SoVITS/pretrained_models/chinese-hubert-base",
+        "/Users/viking/ai/github/GPT-SoVITS/GPT_weights/ningning-e15.ckpt",
+        "/Users/viking/ai/github/GPT-SoVITS/SoVITS_weights/ningning_e8_s80.pth"
+    )
+
+    GptTTSProxy.text_to_speech("我是宁宁，我喜欢唱歌，我喜欢舞台", 'zh', external)
+
