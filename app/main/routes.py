@@ -2,7 +2,7 @@ import os.path
 
 from flask import Flask, render_template, request, jsonify, send_file
 from app.open_ai import chatgpt_proxy
-from app.tts import gtts_proxy
+from app.tts import gtts_proxy, gpt_tts_proxy
 from app.models import Audio
 from app.open_ai import whisper_proxy
 from app.main import bp
@@ -39,7 +39,7 @@ def text_chat():  # put application's code here
     ai_message = agent_facade.dispatch(user_message, chat_history)
 
     # tts转成语音
-    audio_id = gtts_proxy.convert_to_audio(user_id, chat_id, ai_message, "en")
+    audio_id = gpt_tts_proxy.convert_to_audio(user_id, chat_id, ai_message, "en")
 
     # 返回信息
     return jsonify({
