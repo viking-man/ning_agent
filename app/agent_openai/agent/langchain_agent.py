@@ -28,18 +28,18 @@ class LangchainAgent:
             ),
             Tool.from_function(
                 func=RagSearch.rag_search,
-                name="Answer",
+                name="History",
                 description="This method involves researching historical information related to the user's question, providing relevant information to the AI assistant for reference during processing."
             ),
             Tool.from_function(
                 func=SpotifySearch.search_download_songs,
-                name="Answer",
-                description="Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations. The findings should be used as reference material for the large model."
+                name="Music",
+                description="Call this method when user need to play a song, the first parameter song_name is the song to be played, it can not be null; the second parameter artist is the author of the song, it can be null. Example of parameters \"song_name,artist\". The method returns the played information to the user."
             ),
             Tool.from_function(
-                func=RagSearch.rag_search,
-                name="Answer",
-                description="Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations. The findings should be used as reference material for the large model."
+                func=YoutubeSearch.search_and_play,
+                name="Video",
+                description="This method is called when the user needs to play a video, the parameter video_name indicates the name of the video to be played. Search and play the specified video content through youtube webpage, and return the played information to the user after execution."
             ),
         ]
 
@@ -50,7 +50,7 @@ class LangchainAgent:
             handle_parsing_errors=True,
             verbose=True)
 
-    def agent_query(self, input: str = ""):
+    def agent_execute(self, input: str = ""):
         logging.info(f"执行Agent查询,输入{input}")
         result = self.agent_executor.run(input=input)
         logging.info(f"执行Agent查询,输入{input}，输出{result}")
@@ -58,10 +58,11 @@ class LangchainAgent:
 
 
 if __name__ == "__main__":
+    print(OPENAI_API_KEY)
     import langchain
 
     langchain.debug = True
     print(OPENAI_API_KEY)
     agent = LangchainAgent()
-    result = agent.agent_query("历史上中国最早的朝代")
+    result = agent.agent_execute("我想听汪峰的当我想你的时候")
     print(result)

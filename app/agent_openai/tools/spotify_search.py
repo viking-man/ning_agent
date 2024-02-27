@@ -4,6 +4,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import subprocess
 from langchain.tools import tool
+from app.common.utils import string_utils
 
 music_directory = "/Users/viking/song/"
 
@@ -21,8 +22,8 @@ class SpotifySearch:
         command = ['spotdl', song_url, '--output', music_directory]
         subprocess.run(command)
 
-    @tool
-    def search_spotify_music(track_name: str):
+    # @tool
+    def search_spotify_music(track_name: str, artist: str):
         """搜索歌曲在spotify上的歌手名称和对应的url，格式为[{"artist:url"}]"""
         # Set up credentials
         client_credentials_manager = SpotifyClientCredentials(client_id="55ed24ee34534fe48d11b0795f378482",
@@ -30,59 +31,84 @@ class SpotifySearch:
         sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
         # Search for a song
-        results = sp.search(q=track_name, limit=3)
+        results = sp.search(q=track_name, limit=5)
         songs = []
         for idx, item in enumerate(results['tracks']['items']):
-            songs.append({item['artists'][0]['name']: item['external_urls']['spotify']})
+            artists_name_ = item['artists'][0]['name']
+            if artist:
+                if string_utils.contains_chinese(artist):
+                    artist_pinyin = string_utils.chinese_to_pinyin(artist)
+                    if artists_name_ == artist or artists_name_.lower() == artist_pinyin.lower():
+                        songs.append({artists_name_: item['external_urls']['spotify']})
+                elif artists_name_.lower() == artist.lower():
+                    songs.append({artists_name_: item['external_urls']['spotify']})
+            else:
+                songs.append({artists_name_: item['external_urls']['spotify']})
+
+        if len(songs) == 0:
+            for idx, item in enumerate(results['tracks']['items']):
+                artists_name_ = item['artists'][0]['name']
+                songs.append({artists_name_: item['external_urls']['spotify']})
         return songs
 
     # 搜索本地音乐库
     @tool
     def search_local_music(song_name: str):
         """搜索给定目录music_directory是否包含指定的歌曲song_name"""
+        chinese_song_name = string_utils.convert_simple2traditional(song_name)
         for root, dirs, files in os.walk(music_directory):
             for file in files:
                 if song_name.lower() in file.lower():
+                    return os.path.join(root, file)
+                elif chinese_song_name in file:
                     return os.path.join(root, file)
         return None
 
     # 主程序
     @tool
-    def search_download_songs(song_name: str, artist: str):
-        """搜索给定目录music_directory是否包含对应的歌曲，如果本地存在，直接播放；如果本地不存在，从spotify上搜索并下载。
-        如果指定歌手artist，下载对应歌手的歌曲，如果未指定，默认下载第一首。"""
-
+    def search_download_songs(params: str):
+        """当用户需要播放歌曲时调用这个方法，第一个参数song_name是指定播放的歌曲，不可以为空；第二个参数artist是歌曲作者，可以为空。参数示例{"song_name": "Spicy", "artist": "aespa"}。方法执行后返回已播放信息给用户。
+        Call this method when user need to play a song, the first parameter song_name is the song to be played, it can not be null; the second parameter artist is the author of the song, it can be null. Example of parameters {"song_name": "Spicy", "artist": "aespa"}. The method returns the played information to the user.
+        """
+        song_name = params.split(",")[0]
+        artist = params.split(",")[1]
         local_song_path = SpotifySearch.search_local_music(song_name)
         if local_song_path:
             print(f"Playing local song->{local_song_path}")
             # play_local_music(local_song_path)
             SpotifySearch.play_music_with_default_player(local_song_path)
-            return None
+            return f'A song featuring {song_name} has been played'
         else:
-            songs = SpotifySearch.search_spotify_music(song_name)
-            if len(songs) > 0:
-                logging.info(f"Song found on Spotify,songs->{songs}")
-                # 这里可以添加代码来处理Spotify的音乐，比如添加到用户的Spotify库中
-                # download spotify todo 如果出自两个以上艺术家，需要用户选择
-                if artist:
-                    for item in songs:
-                        song = item.get(artist)
-                        if song:
-                            SpotifySearch.download_song(song)
-                            break
-                first_song = next(iter(songs[0].values()))
-                SpotifySearch.download_song(first_song)
-            else:
-                logging.info(f"Song not found->{song_name}")
+            songs = SpotifySearch.search_spotify_music(song_name, artist)
+            # if len(songs) > 0:
+            #     logging.info(f"Song found on Spotify,songs->{songs}")
+            #     # 这里可以添加代码来处理Spotify的音乐，比如添加到用户的Spotify库中
+            #     # download spotify todo 如果出自两个以上艺术家，需要用户选择
+            #     if artist:
+            #         for item in songs:
+            #             song = item.get(artist)
+            #             if song:
+            #                 SpotifySearch.download_song(song)
+            #                 break
+            first_song = next(iter(songs[0].values()))
+            SpotifySearch.download_song(first_song)
+            # else:
+            #     logging.info(f"Song not found->{song_name}")
+            #     return f'{song_name} can not be found on spotify.'
         # 重新搜索播放
-        SpotifySearch.search_play_song(music_directory, song_name)
+        if SpotifySearch.search_play_song(song_name):
+            return f'A song featuring {song_name} has been played'
+        else:
+            return f'{song_name} can not be found on spotify.'
 
-    def search_play_song(music_directory: str, song_name: str):
+    def search_play_song(song_name: str):
         local_song_path = SpotifySearch.search_local_music(song_name)
         if local_song_path:
             print(f"Playing local song->{local_song_path}")
             # play_local_music(local_song_path)
             SpotifySearch.play_music_with_default_player(local_song_path)
+            return True
+        return False
 
     @tool
     def play_music_with_default_player(song_path: str):
@@ -121,5 +147,5 @@ if __name__ == '__main__':
     # 请将下面的 "/path/to/your/music/directory" 替换为您的音乐目录路径
     # main("When We Were Young", "/Users/viking/song")
     # main("Next Level", "/Users/viking/song")
-    SpotifySearch.search_download_songs({"song_name": "Spicy", "artist": "aespa"})
+    SpotifySearch.search_download_songs("当我想你的时候,汪峰")
     # play_direct_spotify("Spicy")

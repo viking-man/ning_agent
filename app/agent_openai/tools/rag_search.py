@@ -29,7 +29,7 @@ class RagSearch:
         formed_related_content = "\n" + related_content
 
         logging.info(f"RagSearch.rag_search request->{query}")
-        current_content = googleSearch.web_search(query)
-        logging.info(f"RagSearch.rag_search response->{current_content}")
+        # current_content = googleSearch.web_search(query)
+        # logging.info(f"RagSearch.rag_search response->{current_content}")
 
-        return formed_related_content, current_content
+        return formed_related_content
