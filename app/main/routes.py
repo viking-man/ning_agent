@@ -39,7 +39,7 @@ def text_chat():  # put application's code here
     ai_message = agent_facade.dispatch(user_message, chat_history)
 
     # tts转成语音
-    audio_id = gpt_tts_proxy.convert_to_audio(user_id, chat_id, ai_message, "en")
+    audio_id = gpt_tts_proxy.convert_to_audio(user_id, chat_id, ai_message)
 
     # 返回信息
     return jsonify({

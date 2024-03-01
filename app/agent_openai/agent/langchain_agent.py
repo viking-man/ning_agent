@@ -64,5 +64,5 @@ if __name__ == "__main__":
     langchain.debug = True
     print(OPENAI_API_KEY)
     agent = LangchainAgent()
-    result = agent.agent_execute("我想听汪峰的当我想你的时候")
+    result = agent.agent_execute("中国两汉是指什么时期")
     print(result)

@@ -3,3 +3,9 @@ class ParameterException(Exception):
         self.parameter_name = parameter_name
         self.message = message
         super().__init__(self.message)
+
+
+class BizException(Exception):
+    def __init__(self, message="Business exception."):
+        self.message = message
+        super().__init__(self.message)

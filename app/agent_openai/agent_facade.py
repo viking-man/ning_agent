@@ -1,4 +1,4 @@
-from ..agent_openai.agent.agent_core import NingAgent
+from app.agent_openai.agent.agent_core import NingAgent
 
 
 ning_agent = NingAgent()

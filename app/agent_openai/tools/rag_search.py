@@ -26,10 +26,10 @@ class RagSearch:
         """This method involves researching historical information related to the user's question,
         providing relevant information to the AI assistant for reference during processing."""
         related_content = localDocQA.query_knowledge(query=query)
-        formed_related_content = "\n" + related_content
+        rag_content = "\n" + related_content
 
         logging.info(f"RagSearch.rag_search request->{query}")
-        # current_content = googleSearch.web_search(query)
-        # logging.info(f"RagSearch.rag_search response->{current_content}")
+        web_content = googleSearch.web_search(query)
+        logging.info(f"GoogleSearch.web_search response->{web_content}")
 
-        return formed_related_content
+        return rag_content, web_content

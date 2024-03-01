@@ -1,4 +1,4 @@
-from gpt_tts_config import *
+from app.tts.gpt_tts_config import *
 import soundfile as sf
 import logging
 from GPT_SoVITS.inference_webui import InferenceWebUI
@@ -55,7 +55,7 @@ def contains_english(text):
     return bool(pattern.search(text))
 
 
-def convert_to_audio(user_id, chat_id, text_content, lang):
+def convert_to_audio(user_id, chat_id, text_content):
     # convert text to speech
     if contains_english(text_content):
         lang = "all_zh"
@@ -76,5 +76,6 @@ def convert_to_audio(user_id, chat_id, text_content, lang):
     db.session.commit()
     return audio.id
 
-# if __name__ == "__main__":
-#     convert_to_audio("123", "456", "我是宁艺卓，我爱唱歌，爱大自然，爱一切充满生命力的东西", "")
+
+if __name__ == "__main__":
+    convert_to_audio("123", "456", "我是宁艺卓，我爱唱歌，爱大自然，爱一切充满生命力的东西，我爱蒋威")

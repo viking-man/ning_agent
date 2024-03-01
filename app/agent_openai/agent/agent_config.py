@@ -6,6 +6,7 @@ LOCAL_MODEL_PATH = os.path.join("G:\data\\transformers\source\chatglm\model")
 LOCAL_CONTENT = os.path.join(os.path.dirname(__file__), "../../resources/docs")
 # PHILOSOPHY_LOCAL_CONTENT = os.path.join(os.path.dirname(__file__), "../resources/docs/philosophy")
 VS_PATH = os.path.join(os.path.dirname(__file__), "vector_store\FAISS")
+CHROMA_VS_PATH = os.path.join(os.path.dirname(__file__), "vector_store\chroma_db")
 CHUNK_SIZE = 768
 CHUNK_OVERLAP = 64
 VECTOR_SEARCH_TOP_K = 2

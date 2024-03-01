@@ -1,7 +1,6 @@
 from typing import Any, List, Dict, Mapping, Optional
 import os
-from langchain.document_loaders import TextLoader
-from langchain.document_loaders import UnstructuredFileLoader
+from langchain_community.document_loaders import TextLoader, UnstructuredFileLoader
 from langchain.vectorstores import FAISS
 import datetime
 import torch
@@ -42,12 +41,10 @@ def load_file(filepath):
     elif filepath.lower().endswith(".pdf"):
 
         loader = PyPDFLoader(filepath)
-        # loader = UnstructuredFileLoader(filepath)
         textsplitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE,
                                                       chunk_overlap=CHUNK_OVERLAP,
                                                       length_function=len)
         docs = textsplitter.split_documents(loader.load())
-        # docs = loader.load_and_split(textsplitter)
     else:
         docs = load_txt_file(filepath)
     return docs
@@ -165,8 +162,8 @@ class LocalDocQA:
     def __init__(self, filepath: str, vs_path: str, embeddings: object,
                  init: bool = True):
         if init and (vs_path and (not os.path.exists(vs_path))):
-            vs_path, loaded_files = init_knowledge_vector_store(filepath=LOCAL_CONTENT,
-                                                                vs_path=VS_PATH,
+            vs_path, loaded_files = init_knowledge_vector_store(filepath=filepath,
+                                                                vs_path=vs_path,
                                                                 embeddings=embeddings)
         else:
             vs_path = VS_PATH
