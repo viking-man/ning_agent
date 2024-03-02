@@ -63,7 +63,7 @@ def convert_to_audio(user_id, chat_id, text_content):
         lang = "zh"
 
     # 定时任务清理
-    file_path = str(Path("app/files/output",
+    file_path = str(Path("app/files/audio/output",
                          user_id + "_" + chat_id + "_" + str(int(time.time())) + ".wav").absolute())
 
     gptTTSModel.text_to_speech(text_content, lang, file_path)

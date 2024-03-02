@@ -8,12 +8,8 @@ from app.open_ai import whisper_proxy
 from app.main import bp
 import io
 import time
-from app import create_app
 from pathlib import Path
 from app.agent_openai import agent_facade
-
-app = create_app()
-
 
 @bp.route('/')
 @bp.route('/index')
@@ -71,7 +67,7 @@ def speech_chat():
     audio_file = request.files['audio']
     # Save the audio file (optional)
     audio_path = str(
-        Path("app/files/input", user_id + "_" + chat_id + "_" + str(time.time()) + ".wav").absolute())
+        Path("app/files/audio/input", user_id + "_" + chat_id + "_" + str(time.time()) + ".wav").absolute())
     audio_file.save(audio_path)
 
     chat_text = whisper_proxy.transcribe_to_text(audio_path)

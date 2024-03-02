@@ -5,6 +5,8 @@ from app.agent_openai.tools.rag_search import RagSearch
 from app.agent_openai.tools.rag_search_chroma import ChromaRagSearch
 from app.agent_openai.tools.spotify_search import SpotifySearch
 from app.agent_openai.tools.youtube_search import YoutubeSearch
+from app.agent_openai.tools.custom_sd import sculpture
+from app.agent_openai.tools.introduce import introduce
 from langchain.agents import BaseSingleActionAgent, AgentOutputParser, LLMSingleActionAgent, AgentExecutor
 from langchain.agents.agent import MultiActionAgentOutputParser
 from typing import List, Tuple, Any, Union, Optional, Type
@@ -31,23 +33,25 @@ class CustomPromptTemplate(StringPromptTemplate):
         action_content = "\n"
         if len(intermediate_steps) == 0:
             background_infomation = "\n"
-            template = router_tempalte
+            template = router_template
 
         # 返回了背景信息
         else:
             # 根据 intermediate_steps 中的 AgentAction 拼装 background_infomation
             background_infomation = "\n\n你还有这些已知信息作为参考：\n\n"
             action, observation = intermediate_steps[0]
-            if isinstance(observation, tuple):
+            if isinstance(observation, tuple) or isinstance(observation, list):
                 background_infomation += observation[0]
                 related_content += observation[1]
             else:
                 background_infomation += f"{observation}\n"
             if "Default" == action.tool or "History" == action.tool:
-                template = generate_template
+                template = generate_template_zh
+            elif "Introduce" == action.tool:
+                return observation
             else:
                 # todo 先默认返回空，后续再看
-                template = action_template
+                template = action_template_zh
                 action_content = observation
 
         kwargs["background_content"] = background_infomation
@@ -60,7 +64,7 @@ class CustomPromptTemplate(StringPromptTemplate):
 class CustomOutputParser(AgentOutputParser):
     def parse(self, llm_output: str) -> Union[AgentAction, AgentFinish]:
         # 正则表达式模式，用于匹配所需的格式
-        pattern = r"(History|Music|Video|Default)\('([^']*)'\)"
+        pattern = r"(History|Music|Video|Painting|Introduce|Default)\('([^']*)'\)"
 
         # 使用 re.match 检查字符串是否与模式匹配
         match = re.match(pattern, llm_output)
@@ -73,6 +77,7 @@ class CustomOutputParser(AgentOutputParser):
             )
         # 否则的话都认为需要调用Tool
         else:
+
             action = match.group(1).strip()
             action_input = match.group(2).strip()
             return AgentAction(tool=action, tool_input=action_input.strip(" ").strip('"'), log=llm_output)
@@ -177,6 +182,16 @@ class NingAgent:
                 name="Video",
                 description="This method is called when the user needs to play a video, the parameter video_name indicates the name of the video to be played. Search and play the specified video content through youtube webpage, and return the played information to the user after execution."
             ),
+            Tool.from_function(
+                func=sculpture,
+                name="Painting",
+                description="This method is used for user drawing-related needs, providing the ability to generate images based on the text, the user inputs a description of the image-related instructions, the method returns the corresponding image output"
+            ),
+            Tool.from_function(
+                func=introduce,
+                name="Introduce",
+                description="This method is used when the user needs the Agent to introduce itself."
+            ),
         ]
         self.tools = tools
         tool_names = [tool.name for tool in tools]
@@ -204,5 +219,5 @@ if __name__ == "__main__":
 
     langchain.debug = True
     ning_agent = NingAgent()
-    result = ning_agent.query("我想听汪峰的我爱你中国")
+    result = ning_agent.query("文明的起源")
     print(result)
