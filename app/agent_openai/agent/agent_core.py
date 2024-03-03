@@ -64,7 +64,7 @@ class CustomPromptTemplate(StringPromptTemplate):
 class CustomOutputParser(AgentOutputParser):
     def parse(self, llm_output: str) -> Union[AgentAction, AgentFinish]:
         # 正则表达式模式，用于匹配所需的格式
-        pattern = r"(History|Music|Video|Painting|Introduce|Default)\('([^']*)'\)"
+        pattern = r"(History|Music|Video|Painting|Introduce|Web|Default)\('([^']*)'\)"
 
         # 使用 re.match 检查字符串是否与模式匹配
         match = re.match(pattern, llm_output)
@@ -86,7 +86,7 @@ class CustomOutputParser(AgentOutputParser):
 class CustomMultiOutputParser(MultiActionAgentOutputParser):
     def parse(self, llm_output: str) -> Union[AgentAction, AgentFinish]:
         # 正则表达式模式，用于匹配所需的格式
-        pattern = r"(History|Music|Video|Painting|Default)\('([^']*)'\)"
+        pattern = r"(History|Music|Video|Painting|Default|Web)\('([^']*)'\)"
 
         # 使用 re.match 检查字符串是否与模式匹配
         match = re.match(pattern, llm_output)
@@ -168,6 +168,11 @@ class NingAgent:
                 description="Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations. The findings should be used as reference material for the large model."
             ),
             Tool.from_function(
+                func=GoogleSearch.web_search,
+                name="Web",
+                description="Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations. The findings should be used as reference material for the large model."
+            ),
+            Tool.from_function(
                 func=ChromaRagSearch.rag_search,
                 name="History",
                 description="This method involves researching historical information related to the user's question, providing relevant information to the AI assistant for reference during processing."
@@ -219,5 +224,5 @@ if __name__ == "__main__":
 
     langchain.debug = True
     ning_agent = NingAgent()
-    result = ning_agent.query("文明的起源")
+    result = ning_agent.query("中国历史上最早的朝代")
     print(result)
