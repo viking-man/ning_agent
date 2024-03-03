@@ -12,7 +12,7 @@ embeddings = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chines
                                    model_kwargs={'device': EMBEDDING_DEVICE})
 
 vector_store = ChromaVectorStore(filepath=LOCAL_CONTENT,
-                                 vs_path=VS_PATH,
+                                 vs_path=CHROMA_VS_PATH,
                                  embeddings=embeddings,
                                  init=True)
 
