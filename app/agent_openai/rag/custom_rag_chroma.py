@@ -26,7 +26,7 @@ class ChromaVectorStore:
         if init and (vs_path and (not os.path.exists(vs_path))):
             vs_path, loaded_files = self.init_knowledge_vector_store(filepath, vs_path, embeddings)
         else:
-            vs_path = VS_PATH
+            vs_path = CHROMA_VS_PATH
             loaded_files = []
 
         self.load_files = loaded_files
@@ -57,7 +57,7 @@ class ChromaVectorStore:
         elif os.path.isdir(filepath):
             sub_docs, sub_failed_files, sub_loaded_files = load_dir(filepath)
             docs += sub_docs
-            failed_files += failed_files
+            failed_files += sub_failed_files
             loaded_files += sub_loaded_files
 
         if len(docs) > 0:

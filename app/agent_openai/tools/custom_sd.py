@@ -31,7 +31,7 @@ def sculpture(prompt: str = ""):
     image_file = str(Path("app/files/image",
                           "image_" + str(int(time.time())) + ".png").absolute())
     image.save(image_file)
-    return image
+    return image_file
 
 
 if __name__ == '__main__':
