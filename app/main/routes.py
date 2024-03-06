@@ -11,6 +11,7 @@ import time
 from pathlib import Path
 from app.agent_openai import agent_facade
 
+
 @bp.route('/')
 @bp.route('/index')
 def index():
@@ -94,6 +95,80 @@ def clear_history():
     userid = data.get('userId')
     print(data)
     return jsonify({'message': 'History cleared successfully'})
+
+
+@bp.route('/get_image_list', methods=['POST'])
+def get_image_list():
+    data = request.get_json()
+    userid = data.get('userId')
+
+    # 示例：替换为实际的目录路径
+    directory_path = os.path.join(os.path.dirname(__file__), f"../files/image")
+
+    # 获取目录下的所有文件名称，并按创建时间排序
+    iamges = get_files_sorted_by_creation_time(directory_path)
+
+    return jsonify({
+        'message': 'History cleared successfully',
+        'imageList': iamges
+    })
+
+
+@bp.route('/get_image')
+def get_image():
+    # 从请求参数中获取文件名
+    file_name = request.args.get('fileName')
+
+    # 构造完整的文件路径
+    file_path = os.path.join(os.path.dirname(__file__), f"../files/image/{file_name}")
+
+    try:
+        # 发送文件作为响应
+        return send_file(file_path, mimetype='image/jpeg')  # 根据实际情况设置 mimetype
+    except FileNotFoundError:
+        # 处理文件不存在的情况
+        return 'File not found', 404
+
+
+def get_files_sorted_by_creation_time(directory):
+    try:
+        # 获取目录下的所有文件和子目录
+        all_files = os.listdir(directory)
+
+        # 过滤出文件，而非子目录，并获取文件的创建时间
+        files_with_creation_time = [(file, os.path.getctime(os.path.join(directory, file))) for file in all_files if
+                                    os.path.isfile(os.path.join(directory, file))]
+
+        # 根据创建时间排序文件列表
+        sorted_files = sorted(files_with_creation_time, key=lambda x: x[1], reverse=True)
+
+        # 仅返回文件名称，不包括创建时间
+        sorted_file_names = [file[0] for file in sorted_files]
+
+        return sorted_file_names
+    except Exception as e:
+        print(f"Error getting files: {e}")
+        return None
+
+
+if __name__ == "__main__":
+    # file_name = "test.png"
+    # image_path = os.path.join(os.path.dirname(__file__), f"../files/image/{file_name}")
+    # from PIL import Image
+    #
+    # image = Image.open(image_path)
+    # print(image)
+
+    directory_path = os.path.join(os.path.dirname(__file__), f"../files/image")
+
+    sorted_files_in_directory = get_files_sorted_by_creation_time(directory_path)
+    # 检查是否成功获取并排序文件列表
+    if sorted_files_in_directory:
+        print("Files in the directory sorted by creation time:")
+        for file_name in sorted_files_in_directory:
+            print(file_name)
+    else:
+        print("Failed to get files in the directory.")
 
 # @bp.before_request
 # def log_request_info():

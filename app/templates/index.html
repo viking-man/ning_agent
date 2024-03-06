@@ -30,7 +30,20 @@
         Your browser does not support the audio element.
     </audio>
 </div>
+<div>
+    <!-- 刷新按钮 -->
+    <button onclick="refreshImageList()">刷新图片列表</button>
 
+    <!-- 图片列表下拉框 -->
+    <select id="imageListDropdown" onchange="showSelectedImage()">
+        <!-- 图片名称列表将显示在这里 -->
+    </select>
+
+    <!-- 图片展示区域 -->
+    <div id="imageDisplay">
+        <!-- 图片将显示在这里 -->
+    </div>
+</div>
 <script>
 
     let chatId = "";
@@ -105,8 +118,15 @@
                     const audioBlob = new Blob(chunks, {type: 'audio/wav'});
                     const audioUrl = URL.createObjectURL(audioBlob);
                     console.log('Audio URL:', audioUrl);
-                    {#const chatBoxDiv = document.getElementById('chatBox');#}
-                    {#chatBoxDiv.innerHTML = `<audio controls src="${audioUrl}"></audio>`;#}
+                    // {
+                    //     #const
+                    //     chatBoxDiv = document.getElementById('chatBox');
+                    // #
+                    // }
+                    // {
+                    //     #chatBoxDiv.innerHTML = `<audio controls src="${audioUrl}"></audio>`;
+                    // #
+                    // }
                 };
 
                 mediaRecorder.start();
@@ -143,8 +163,15 @@
             .then(response => response.json())
             .then(data => {
                 console.log(data)
-                {#const chatBoxDiv = document.getElementById('chatBox');#}
-                {#chatBoxDiv.innerHTML = `<p>Transcription: ${data.transcription}</p>`;#}
+                // {
+                //     #const
+                //     chatBoxDiv = document.getElementById('chatBox');
+                // #
+                // }
+                // {
+                //     #chatBoxDiv.innerHTML = `<p>Transcription: ${data.transcription}</p>`;
+                // #
+                // }
                 chatHistory = data.chat_history
                 chatId = data.chat_id
                 displayMessage(User, data.user_message)
@@ -168,7 +195,10 @@
                 const audioPlayer = document.getElementById('audioPlayer');
                 audioPlayer.src = audioUrl;
                 audioPlayer.play();
-                {#audioPlayer.style.display = 'none';#}
+                // {
+                //     #audioPlayer.style.display = 'none';
+                // #
+                // }
             })
             .catch(error => {
                 console.error('Error fetching audio file:', error);
@@ -217,6 +247,110 @@
                 console.error('Error fetching data:', error);
             });
     };
+
+    // 初始图片列表为空
+    let imageListData = [];
+    // 获取图片列表的元素
+    const imageListElement = document.getElementById('imageList');
+
+    // 刷新图片列表按钮点击事件
+    function refreshImageList() {
+        // 清空之前的图片列表内容
+        imageListElement.innerHTML = '';
+
+        // 获取最新的图片列表
+        getImageList();
+    }
+
+    // 获取图片列表的函数
+    function getImageList() {
+        // 发起请求获取图片列表
+        fetch('/get_image_list', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // 添加其他可能的请求参数，例如用户ID
+            body: JSON.stringify({
+                userId: userId,
+            }),
+        })  // 这里的路径应该根据你的后端路由来设置
+            .then(response => response.json())
+            .then(data => {
+                // 获取图片列表数据
+                imageListData = data.imageList;
+
+                // 获取下拉列表的元素
+                const dropdown = document.getElementById('imageListDropdown');
+
+                // 清空之前的内容
+                dropdown.innerHTML = '';
+
+                // 将图片列表数据添加到下拉列表中
+                imageListData.forEach(imageName => {
+                    // 创建一个新的选项元素
+                    const optionElement = document.createElement('option');
+                    optionElement.value = imageName;
+                    optionElement.textContent = imageName;
+
+                    // 将选项元素添加到下拉列表中
+                    dropdown.appendChild(optionElement);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching image list:', error);
+            });
+    }
+
+    // 初始加载图片列表
+    getImageList();
+
+    // 展示图片的函数
+    function showImage(imageName) {
+        // 构造后端获取图片的接口
+        const imageUrl = `/get_image?fileName=${imageName}`;
+
+        // 获取图片显示的元素
+        const imageDisplay = document.getElementById('imageDisplay');
+
+        // 创建一个新的图片元素
+        const imageElement = document.createElement('img');
+
+        // 使用 fetch 获取图片数据
+        fetch(imageUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // 将 blob 数据转换为图片 URL
+                // 设置图片元素的属性
+                imageElement.src = URL.createObjectURL(blob);
+                imageElement.alt = 'Image Display';
+
+                // 清空之前的内容，然后将图片添加到元素中
+                imageDisplay.innerHTML = '';
+                imageDisplay.appendChild(imageElement);
+            })
+            .catch(error => {
+                console.error('Error fetching image:', error);
+            });
+    }
+
+    function showSelectedImage() {
+    // 获取下拉列表的元素
+    const dropdown = document.getElementById('imageListDropdown');
+
+    // 获取选中的图片名称
+    const selectedImageName = dropdown.value;
+
+    // 如果选中的图片名称不为空，则调用显示图片的函数
+    if (selectedImageName) {
+        showImage(selectedImageName);
+    }
+}
 
 </script>
 </body>
