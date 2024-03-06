@@ -21,7 +21,7 @@ class CustomPromptTemplate(StringPromptTemplate):
         # 没有互联网查询信息
         if len(intermediate_steps) == 0:
             background_infomation = "\n"
-            role = "傻瓜机器人"
+            role = "问题分类机器人"
             question_guide = "我现在有一个问题"
             answer_format = "如果你知道答案，请直接给出你的回答！如果你不知道答案，请你只回答\"GoogleSearch('搜索词')\"，并将'搜索词'替换为你认为需要搜索的关键词，除此之外不要回答其他任何内容。\n\n下面请回答我上面提出的问题！"
 

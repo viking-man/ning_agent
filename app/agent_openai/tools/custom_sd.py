@@ -11,8 +11,8 @@ class CustomStableDiffusion:
     def __init__(self) -> None:
         self.pipeline = StableDiffusionPipeline.from_single_file(STABLE_DIFFUSION_MODEL_PATH)
         self.pipeline.scheduler = DPMSolverMultistepScheduler.from_config(self.pipeline.scheduler.config)
-        self.pipeline.safety_checker = None
-        self.pipeline.requires_safety_checker = False
+        # self.pipeline.safety_checker = None
+        # self.pipeline.requires_safety_checker = False
         DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
         self.pipeline = self.pipeline.to(DEVICE)
 
