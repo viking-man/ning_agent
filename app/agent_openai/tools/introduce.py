@@ -7,5 +7,6 @@ def introduce(input: str):
 
 
 def default(input: str):
-    '''这个方法默认返回输入信息'''
+    '''当无法分类问题或者大模型认为可以回答时使用这个方法'''
+    '''Use this when it is impossible to categorize the question or when the larger model thinks it can be answered'''
     return input

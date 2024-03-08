@@ -1,4 +1,3 @@
-
 from langchain.agents import Tool
 from langchain.tools import BaseTool
 from langchain import PromptTemplate, LLMChain
@@ -11,6 +10,15 @@ from langchain.prompts import StringPromptTemplate
 from langchain.callbacks.manager import CallbackManagerForToolRun
 from app.agent_chatglm.agent_llm import CustomLLM
 import re
+from app.agent_openai.agent.agent_template import *
+from app.agent_openai.tools.web_search import GoogleSearch
+from app.agent_openai.tools.rag_search import RagSearch
+from app.agent_openai.tools.rag_search_chroma import ChromaRagSearch
+from app.agent_openai.tools.spotify_search import SpotifySearch
+from app.agent_openai.tools.youtube_search import YoutubeSearch
+from app.agent_openai.tools.custom_sd import sculpture
+from app.agent_openai.tools.introduce import introduce, default
+
 
 class CustomPromptTemplate(StringPromptTemplate):
     template: str
@@ -19,92 +27,116 @@ class CustomPromptTemplate(StringPromptTemplate):
     def format(self, **kwargs) -> str:
         intermediate_steps = kwargs.pop("intermediate_steps")
         # 没有互联网查询信息
+        related_content = "\n"
+        action_content = "\n"
         if len(intermediate_steps) == 0:
             background_infomation = "\n"
-            role = "问题分类机器人"
-            question_guide = "我现在有一个问题"
-            answer_format = "如果你知道答案，请直接给出你的回答！如果你不知道答案，请你只回答\"GoogleSearch('搜索词')\"，并将'搜索词'替换为你认为需要搜索的关键词，除此之外不要回答其他任何内容。\n\n下面请回答我上面提出的问题！"
+            template = router_template
 
         # 返回了背景信息
         else:
             # 根据 intermediate_steps 中的 AgentAction 拼装 background_infomation
             background_infomation = "\n\n你还有这些已知信息作为参考：\n\n"
             action, observation = intermediate_steps[0]
-            background_infomation += f"{observation}\n"
-            role = "聪明的 AI 助手"
-            question_guide = "请根据这些已知信息回答我的问题"
-            answer_format = ""
+            if isinstance(observation, tuple) or isinstance(observation, list):
+                background_infomation += observation[0]
+                related_content += observation[1]
+            else:
+                background_infomation += f"{observation}\n"
+            if "Default" == action.tool or "History" == action.tool:
+                template = generate_template_zh
+            elif "Introduce" == action.tool:
+                return observation
+            else:
+                # todo 先默认返回空，后续再看
+                template = action_template_zh
+                action_content = observation
 
-        kwargs["background_infomation"] = background_infomation
-        kwargs["role"] = role
-        kwargs["question_guide"] = question_guide
-        kwargs["answer_format"] = answer_format
-        return self.template.format(**kwargs)
+        kwargs["background_content"] = background_infomation
+        kwargs["related_content"] = related_content
+        kwargs["action_content"] = action_content
+        return template.format(**kwargs)
 
-class CustomSearchTool(BaseTool):
-    name: str = "GoogleSearch"
-    description: str = ""
 
-    def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None):
-        return GoogleSearch.search(query = query)
-
-    async def _arun(self, query: str):
-        raise NotImplementedError("GoogleSearch does not support async")
-
-class CustomAgent(BaseSingleActionAgent):
-    @property
-    def input_keys(self):
-        return ["input"]
-
-    def plan(self, intermedate_steps: List[Tuple[AgentAction, str]],
-            **kwargs: Any) -> Union[AgentAction, AgentFinish]:
-        return AgentAction(tool="GoogleSearch", tool_input=kwargs["input"], log="")
-
+# 匹配每个tool的格式
 class CustomOutputParser(AgentOutputParser):
     def parse(self, llm_output: str) -> Union[AgentAction, AgentFinish]:
-        # group1 = 调用函数名字
-        # group2 = 传入参数
-        match = re.match(r'^[\s\w]*(GoogleSearch)\(([^\)]+)\)', llm_output, re.DOTALL)
+        # 正则表达式模式，用于匹配所需的格式
+        pattern = r"(History|Music|Video|Painting|Introduce|Web|Default)\('([^']*)'\)"
 
-        # 如果 llm 没有返回 GoogleSearch() 则认为直接结束指令
+        # 使用 re.match 检查字符串是否与模式匹配
+        match = re.match(pattern, llm_output)
+
+        # 如果llm没有返回History|Music|Video|Default则认为直接结束指令
         if not match:
             return AgentFinish(
                 return_values={"output": llm_output.strip()},
                 log=llm_output,
             )
-        # 否则的话都认为需要调用 Tool
+        # 否则的话都认为需要调用Tool
         else:
+
             action = match.group(1).strip()
             action_input = match.group(2).strip()
             return AgentAction(tool=action, tool_input=action_input.strip(" ").strip('"'), log=llm_output)
 
 
 class DeepAgent:
-    tool_name: str = "GoogleSearch"
+    tool_names: str = ""
     agent_executor: any
     tools: List[Tool]
     llm_chain: any
 
-    def query(self, related_content: str = "", query: str = ""):
-        tool_name = self.tool_name
-        result = self.agent_executor.run(related_content=related_content, input=query ,tool_name=self.tool_name)
+    def query(self, query: str = "", chat_history: str = ""):
+        # tool_name = self.tool_name
+        result = self.agent_executor.run(chat_history=chat_history, input=query, tool_name="")
         return result
 
     def __init__(self, **kwargs):
         llm = CustomLLM()
         tools = [
-                    Tool.from_function(
-                        func=GoogleSearch.search,
-                        name="GoogleSearch",
-                        description=""
-                    )
-                ]
+            Tool.from_function(
+                func=default,
+                name="Default",
+                description="Use this when it is impossible to categorize the question or when the larger model thinks it can be answered."
+            ),
+            Tool.from_function(
+                func=GoogleSearch.web_search,
+                name="Web",
+                description="Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations. The findings should be used as reference material for the large model."
+            ),
+            Tool.from_function(
+                func=ChromaRagSearch.rag_search,
+                name="History",
+                description="This method involves researching historical information related to the user's question, providing relevant information to the AI assistant for reference during processing."
+            ),
+            Tool.from_function(
+                func=SpotifySearch.search_download_songs,
+                name="Music",
+                description="Call this method when user need to play a song, the first parameter song_name is the song to be played, it can not be null; the second parameter artist is the author of the song, it can be null. Example of parameters \"song_name,artist\". The method returns the played information to the user."
+            ),
+            Tool.from_function(
+                func=YoutubeSearch.search_and_play,
+                name="Video",
+                description="This method is called when the user needs to play a video, the parameter video_name indicates the name of the video to be played. Search and play the specified video content through youtube webpage, and return the played information to the user after execution."
+            ),
+            Tool.from_function(
+                func=sculpture,
+                name="Painting",
+                description="This method is used for user drawing-related needs, providing the ability to generate images based on the text, the user inputs a description of the image-related instructions, the method returns the corresponding image output"
+            ),
+            Tool.from_function(
+                func=introduce,
+                name="Introduce",
+                description="This method is used when the user needs the Agent to introduce itself."
+            ),
+        ]
         self.tools = tools
         tool_names = [tool.name for tool in tools]
         output_parser = CustomOutputParser()
-        prompt = CustomPromptTemplate(template=agent_template,
+        prompt = CustomPromptTemplate(template="",
                                       tools=tools,
-                                      input_variables=["related_content","tool_name", "input", "intermediate_steps"])
+                                      input_variables=["chat_history", "input", "intermediate_steps"])
 
         llm_chain = LLMChain(llm=llm, prompt=prompt)
         self.llm_chain = llm_chain
@@ -121,31 +153,5 @@ class DeepAgent:
 
 
 if __name__ == "__main__":
-    from ..agent.agent_llm import CustomLLM
-
-    llm = CustomLLM()
-    tools = [
-                Tool.from_function(
-                    func=GoogleSearch.search,
-                    name="GoogleSearch",
-                    description=""
-                )
-            ]
-    tool_names = [tool.name for tool in tools]
-    output_parser = CustomOutputParser()
-    prompt = CustomPromptTemplate(template=agent_template,
-                                  tools=tools,
-                                  input_variables=["related_content","tool_name", "input", "intermediate_steps"])
-
-    llm_chain = LLMChain(llm=llm, prompt=prompt)
-
-    agent = LLMSingleActionAgent(
-        llm_chain=llm_chain,
-        output_parser=output_parser,
-        stop=["\nObservation:"],
-        allowed_tools=tool_names
-    )
-
-    agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True)
-    print(agent_executor.run(related_content="", input="生命的起源是什么", tool_name="GoogleSearch"))
-
+    agent = DeepAgent()
+    agent.query("续写诗词，万里千山只等君前")

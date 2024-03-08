@@ -6,7 +6,7 @@ from app.agent_openai.tools.rag_search_chroma import ChromaRagSearch
 from app.agent_openai.tools.spotify_search import SpotifySearch
 from app.agent_openai.tools.youtube_search import YoutubeSearch
 from app.agent_openai.tools.custom_sd import sculpture
-from app.agent_openai.tools.introduce import introduce
+from app.agent_openai.tools.introduce import introduce, default
 from langchain.agents import BaseSingleActionAgent, AgentOutputParser, LLMSingleActionAgent, AgentExecutor
 from langchain.agents.agent import MultiActionAgentOutputParser
 from typing import List, Tuple, Any, Union, Optional, Type
@@ -117,7 +117,7 @@ class Ning2Agent:
         # print(str(self.tools))
         self.tools = [
             Tool.from_function(
-                func=GoogleSearch.web_search,
+                func=default,
                 name="Default",
                 description="Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations. The findings should be used as reference material for the large model."
             ),
@@ -163,9 +163,9 @@ class NingAgent:
         llm = ChatOpenAI(temperature=0, model=ChatGPTModel.GPT3.value, openai_api_key=OPENAI_API_KEY)
         tools = [
             Tool.from_function(
-                func=GoogleSearch.web_search,
+                func=default,
                 name="Default",
-                description="Utilize the default web search tool to investigate the user's query, focusing on the most recent web pages that provide explanations. The findings should be used as reference material for the large model."
+                description="Use this when it is impossible to categorize the question or when the larger model thinks it can be answered."
             ),
             Tool.from_function(
                 func=GoogleSearch.web_search,
@@ -224,5 +224,5 @@ if __name__ == "__main__":
 
     langchain.debug = True
     ning_agent = NingAgent()
-    result = ning_agent.query("中国历史上最早的朝代")
+    result = ning_agent.query("1+1=?")
     print(result)
