@@ -1,6 +1,7 @@
 import whisper
 import time
 import logging
+import torch
 
 
 class WhisperModel():
@@ -8,9 +9,10 @@ class WhisperModel():
         self.sample_rate = sample_rate
         self.device = None
         self.whisper_model = None
+        self.device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 
     def load_model(self):
-        self.whisper_model = whisper.load_model("small", "cpu")
+        self.whisper_model = whisper.load_model("small", self.device)
 
     def transcribe(self, audio, lang):
         tic = time.time()
