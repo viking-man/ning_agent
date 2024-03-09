@@ -32,12 +32,14 @@
 </div>
 <div>
     <!-- 刷新按钮 -->
-    <button onclick="refreshImageList()">刷新图片列表</button>
+    <button onclick="getImageList()">刷新图片列表</button>
 
     <!-- 图片列表下拉框 -->
-    <select id="imageListDropdown" onchange="showSelectedImage()">
-        <!-- 图片名称列表将显示在这里 -->
-    </select>
+    <div id="imageList">
+        <select id="imageListDropdown" onmousedown="showSelectedImage()">
+            <!-- 图片名称列表将显示在这里 -->
+        </select>
+    </div>
 
     <!-- 图片展示区域 -->
     <div id="imageDisplay">
@@ -249,12 +251,15 @@
     };
 
     // 初始图片列表为空
-    let imageListData = [];
-    // 获取图片列表的元素
-    const imageListElement = document.getElementById('imageList');
+    // let imageListData = [];
+
 
     // 刷新图片列表按钮点击事件
     function refreshImageList() {
+
+        // 获取图片列表的元素
+        const imageListElement = document.getElementById('imageListDropdown');
+
         // 清空之前的图片列表内容
         imageListElement.innerHTML = '';
 
@@ -264,6 +269,8 @@
 
     // 获取图片列表的函数
     function getImageList() {
+        let imageListData = []
+
         // 发起请求获取图片列表
         fetch('/get_image_list', {
             method: 'POST',
@@ -340,17 +347,17 @@
     }
 
     function showSelectedImage() {
-    // 获取下拉列表的元素
-    const dropdown = document.getElementById('imageListDropdown');
+        // 获取下拉列表的元素
+        const dropdown = document.getElementById('imageListDropdown');
 
-    // 获取选中的图片名称
-    const selectedImageName = dropdown.value;
+        // 获取选中的图片名称
+        const selectedImageName = dropdown.value;
 
-    // 如果选中的图片名称不为空，则调用显示图片的函数
-    if (selectedImageName) {
-        showImage(selectedImageName);
+        // 如果选中的图片名称不为空，则调用显示图片的函数
+        if (selectedImageName) {
+            showImage(selectedImageName);
+        }
     }
-}
 
 </script>
 </body>
