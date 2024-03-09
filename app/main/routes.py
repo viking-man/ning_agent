@@ -82,7 +82,7 @@ def speech_chat():
     ai_message = agent_facade.dispatch(chat_text, chat_history)
 
     # tts转成语音
-    audio_id = gtts_proxy.convert_to_audio(user_id, chat_id, ai_message, "en")
+    audio_id = gpt_tts_proxy.convert_to_audio(user_id, chat_id, ai_message)
 
     return jsonify({
         'user_message': chat_text,
