@@ -77,7 +77,9 @@ def speech_chat():
         chat_id = str(abs(hash(chat_text)))
 
     # chatgpt请求
-    ai_message, chat_history = chatgpt_proxy.text_chat(chat_text, user_id, chat_id, gpt_version)
+    # ai_message, chat_history = chatgpt_proxy.text_chat(chat_text, user_id, chat_id, gpt_version)
+    chat_history, _ = chatgpt_proxy.get_chat_history(user_id, chat_id, gpt_version)
+    ai_message = agent_facade.dispatch(chat_text, chat_history)
 
     # tts转成语音
     audio_id = gtts_proxy.convert_to_audio(user_id, chat_id, ai_message, "en")
