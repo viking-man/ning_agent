@@ -5,6 +5,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 import subprocess
 from langchain.tools import tool
 from app.common.utils import string_utils
+from app.common.error import BizException
 
 music_directory = "/Users/viking/song/"
 
@@ -15,6 +16,19 @@ songs_path = '/Users/viking/song/'
 
 
 class SpotifySearch:
+
+    def download_song_for_web(song_url: str, song_path: str):
+        """用于下载本地不存在的音乐文件，需要的参数分别为歌曲在spotify的song_url和保存歌曲的目录song_directory"""
+        try:
+            command = ['spotdl', song_url, '--output', song_path]
+            subprocess.run(command, stdout=subprocess.PIPE, text=True, check=True)
+
+            return song_url
+
+        except subprocess.CalledProcessError as e:
+            raise BizException(message=f"下载音乐时发生错误->{e}")
+        except Exception as e:
+            raise e
 
     @tool
     def download_song(song_url: str):

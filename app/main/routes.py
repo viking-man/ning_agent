@@ -10,6 +10,8 @@ import io
 import time
 from pathlib import Path
 from app.agent_openai import agent_facade
+from app.common.error import ParameterException
+from os import path
 
 
 @bp.route('/')
@@ -132,6 +134,36 @@ def get_image():
         return 'File not found', 404
 
 
+@bp.route('/download_video', methods=['POST'])
+def download_video():
+    data = request.get_json()
+    video_url = data.get('videoUrl')
+    video_file_path = data.get('videoFilePath')
+    if not video_url:
+        raise ParameterException("video_url")
+    if not video_file_path or not path.exists(video_file_path):
+        raise ParameterException("video_path")
+
+    video_file = agent_facade.download_youtube_video(video_url, video_file_path)
+
+    return jsonify({'message': f'Youtube video download onto {video_file} successfully'})
+
+
+@bp.route('/download_music', methods=['POST'])
+def download_music():
+    data = request.get_json()
+    musicUrl = data.get('musicUrl')
+    musicFilePath = data.get('musicFilePath')
+    if not musicUrl:
+        raise ParameterException("musicUrl")
+    if not musicFilePath or not path.exists(musicFilePath):
+        raise ParameterException("video_path")
+
+    music_file = agent_facade.download_spotify_music(musicUrl, musicFilePath)
+
+    return jsonify({'message': f'Spotify music download onto {music_file} successfully'})
+
+
 def get_files_sorted_by_creation_time(directory):
     try:
         # 获取目录下的所有文件和子目录
@@ -151,35 +183,3 @@ def get_files_sorted_by_creation_time(directory):
     except Exception as e:
         print(f"Error getting files: {e}")
         return None
-
-
-if __name__ == "__main__":
-    # file_name = "test.png"
-    # image_path = os.path.join(os.path.dirname(__file__), f"../files/image/{file_name}")
-    # from PIL import Image
-    #
-    # image = Image.open(image_path)
-    # print(image)
-
-    directory_path = os.path.join(os.path.dirname(__file__), f"../files/image")
-
-    sorted_files_in_directory = get_files_sorted_by_creation_time(directory_path)
-    # 检查是否成功获取并排序文件列表
-    if sorted_files_in_directory:
-        print("Files in the directory sorted by creation time:")
-        for file_name in sorted_files_in_directory:
-            print(file_name)
-    else:
-        print("Failed to get files in the directory.")
-
-# @bp.before_request
-# def log_request_info():
-#     app.logger.debug('Headers: %s', request.headers)
-#     app.logger.debug('Body: %s', request.get_data())
-#
-#
-# @bp.after_request
-# def log_response_info(response):
-#     app.logger.debug('Headers: %s', response.headers)
-#     app.logger.debug('Body: %s', response.get_data())
-#     return response

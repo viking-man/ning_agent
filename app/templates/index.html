@@ -1,49 +1,90 @@
 <!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NingNing Agent</title>
-    <link
-            rel="shortcut icon"
-            href="{{ url_for('static', filename='ning.JPG') }}"
-    />
-    <link rel="stylesheet" href="{{ url_for('static', filename='main2.css') }}"/>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='ning.JPG') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main3.css') }}">
 </head>
-
 <body>
-<img src="{{ url_for('static', filename='ning_wink.jpg') }}" class="icon"/>
-<h3>宁宁小助理</h3>
+<div class="container">
+    <img src="{{ url_for('static', filename='ning_wink.jpg') }}" class="icon">
+    <h3>宁宁小助理</h3>
 
-<div>
-    <div id="chatBox"></div>
-    <textarea id="userMessage" class="question-textarea" placeholder="Ask me a question"></textarea>
-    <div>
-        <label for="gptVersion">Choose GPT Version:</label>
-        <select id="gptVersion" name="gptVersion">
-            <option value="GPT3" selected>GPT3</option>
-            <option value="GPT4">GPT4</option>
-        </select>
-    </div>
-    <button onclick="sendMessage()" class="blue-button">Text Chat</button>
-    <button id="recordButton" class="blue-button" onclick="toggleRecording()">Start audio</button>
-    <button id="clearButton" class="red-button" onclick="clearHistory()">Clear History</button>
-    &nbsp;
-    <audio id="audioPlayer" controls>
-        Your browser does not support the audio element.
-    </audio>
-</div>
-<div>
-    <!-- 刷新按钮 -->
-    <button onclick="getImageList()">刷新图片列表</button>
+    <div class="chat-section">
+        <div id="chatBox"></div>
+        <textarea id="userMessage" class="question-textarea" placeholder="Ask me a question"></textarea>
 
-    <!-- 图片列表下拉框 -->
-    <div id="imageList">
-        <select id="imageListDropdown" onmousedown="showSelectedImage()">
-            <!-- 图片名称列表将显示在这里 -->
-        </select>
+        <div class="options">
+            <label for="gptVersion">Choose GPT Version:</label>
+            <select id="gptVersion" name="gptVersion">
+                <option value="GPT3" selected>GPT3</option>
+                <option value="GPT4">GPT4</option>
+            </select>
+            <div class="action-buttons">
+                <button onclick="sendMessage()" class="blue-button">Text Chat</button>
+                <button id="recordButton" class="blue-button" onclick="toggleRecording()">Start audio</button>
+                <button id="clearButton" class="red-button" onclick="clearHistory()">Clear History</button>
+            </div>
+            <audio id="audioPlayer" controls>Your browser does not support the audio element.
+            </audio>
+        </div>
     </div>
 
-    <!-- 图片展示区域 -->
-    <div id="imageDisplay">
-        <!-- 图片将显示在这里 -->
+    <div class="image-section">
+        <button class="green-button" onclick="getImageList()">Refresh Image List</button>
+        <select id="imageListDropdown" onclick="showSelectedImage()"></select>
+
+        <div id="imageDisplay" class="image-display">
+            <div class="image-popup" id="imagePopup">
+                <span class="close-btn" onclick="closeImagePopup()">×</span>
+                <img src="" alt="Image Display" id="popupImage">
+                <div>
+                    <button class="prev-btn" onclick="showPreviousImage()">Previous</button>
+                    <button class="next-btn" onclick="showNextImage()">Next</button>
+                    <button class="download-btn" onclick="downloadImage()">Download</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="download-section" id="downloadSection">
+        <div class="download-header" onclick="toggleDownloadSection()">Download Section</div>
+
+        <div class="download-content">
+            <!-- 下载模块内容 -->
+            <div>
+                <form id="downloadVideoForm">
+                    <label for="videoUrl">Youtube Video URL:</label>
+                    <input type="text" id="videoUrl" placeholder="Enter video URL" required>
+
+                    <label for="videoFilePath">Video File Path:</label>
+                    <input type="text" id="videoFilePath" placeholder="Enter Video path name" required>
+
+                    <button id = "downloadVideoButton" type="button" onclick="downloadVideo()">Download Video</button>
+                </form>
+            </div>
+            <div>
+                <form id="downloadMusicForm">
+                    <label for="musicUrl">Spotify Music URL:</label>
+                    <input type="text" id="musicUrl" placeholder="Enter video URL" required>
+
+                    <label for="musicFilePath">Music File Path:</label>
+                    <input type="text" id="musicFilePath" placeholder="Enter Music path name" required>
+
+                    <button id="downloadMusicButton" type="button" onclick="downloadMusic()">Download Music</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <p id="modalMessage"></p>
+        </div>
     </div>
 </div>
 <script>
@@ -251,7 +292,8 @@
     };
 
     // 初始图片列表为空
-    // let imageListData = [];
+    let imageListData = [];
+    let currentIndex = -1; // 初始索引值
 
 
     // 刷新图片列表按钮点击事件
@@ -269,7 +311,8 @@
 
     // 获取图片列表的函数
     function getImageList() {
-        let imageListData = []
+        imageListData = [];
+        currentIndex = -1;
 
         // 发起请求获取图片列表
         fetch('/get_image_list', {
@@ -312,18 +355,10 @@
     // 初始加载图片列表
     getImageList();
 
-    // 展示图片的函数
     function showImage(imageName) {
-        // 构造后端获取图片的接口
         const imageUrl = `/get_image?fileName=${imageName}`;
+        const popupImage = document.getElementById('popupImage');
 
-        // 获取图片显示的元素
-        const imageDisplay = document.getElementById('imageDisplay');
-
-        // 创建一个新的图片元素
-        const imageElement = document.createElement('img');
-
-        // 使用 fetch 获取图片数据
         fetch(imageUrl)
             .then(response => {
                 if (!response.ok) {
@@ -332,31 +367,213 @@
                 return response.blob();
             })
             .then(blob => {
-                // 将 blob 数据转换为图片 URL
-                // 设置图片元素的属性
-                imageElement.src = URL.createObjectURL(blob);
-                imageElement.alt = 'Image Display';
-
-                // 清空之前的内容，然后将图片添加到元素中
-                imageDisplay.innerHTML = '';
-                imageDisplay.appendChild(imageElement);
+                popupImage.src = URL.createObjectURL(blob);
+                openImagePopup();
             })
             .catch(error => {
                 console.error('Error fetching image:', error);
             });
     }
 
-    function showSelectedImage() {
-        // 获取下拉列表的元素
-        const dropdown = document.getElementById('imageListDropdown');
+    // function showSelectedImage() {
+    //     const dropdown = document.getElementById('imageListDropdown');
+    //     const selectedImageName = dropdown.value;
+    //
+    //     if (selectedImageName) {
+    //         showImage(selectedImageName);
+    //     }
+    // }
 
-        // 获取选中的图片名称
+    function openImagePopup() {
+        const imagePopup = document.getElementById('imagePopup');
+        imagePopup.style.display = 'block';
+    }
+
+    function closeImagePopup() {
+        const imagePopup = document.getElementById('imagePopup');
+        imagePopup.style.display = 'none';
+    }
+
+    function showSelectedImage() {
+        const dropdown = document.getElementById('imageListDropdown');
         const selectedImageName = dropdown.value;
 
-        // 如果选中的图片名称不为空，则调用显示图片的函数
         if (selectedImageName) {
+            // 获取选中图片在列表中的索引
+            currentIndex = imageListData.indexOf(selectedImageName);
             showImage(selectedImageName);
         }
+    }
+
+    function showPreviousImage() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            const previousImage = imageListData[currentIndex];
+            showImage(previousImage);
+        } else {
+            // 如果已经是第一张图片，可以选择循环到最后一张图片
+            currentIndex = imageListData.length - 1;
+            const lastImage = imageListData[currentIndex];
+            showImage(lastImage);
+        }
+    }
+
+    function showNextImage() {
+        if (currentIndex < imageListData.length - 1) {
+            currentIndex++;
+            const nextImage = imageListData[currentIndex];
+            showImage(nextImage);
+        } else {
+            // 如果已经是最后一张图片，可以选择循环到第一张图片
+            currentIndex = 0;
+            const firstImage = imageListData[currentIndex];
+            showImage(firstImage);
+        }
+    }
+
+    function downloadImage() {
+        const popupImage = document.getElementById('popupImage');
+
+        // 获取当前图片的文件名
+        const selectedImageName = imageListData[currentIndex];
+
+        // 构造后端获取图片的接口
+        const imageUrl = `/get_image?fileName=${selectedImageName}`;
+
+        // 发起请求下载图片
+        fetch(imageUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // 创建一个临时的a标签用于下载
+                const a = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                a.href = url;
+                a.download = selectedImageName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            })
+            .catch(error => {
+                console.error('Error fetching image for download:', error);
+            });
+    }
+
+    function toggleDownloadSection() {
+        const downloadContent = document.querySelector('.download-content');
+        downloadContent.classList.toggle('hidden');
+    }
+
+    toggleDownloadSection();
+
+
+    // 下载模块
+    function openModal(message) {
+        const modal = document.getElementById('myModal');
+        const modalMessage = document.getElementById('modalMessage');
+        modalMessage.textContent = message;
+        modal.classList.add('showCloseButton', 'showModal');
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('myModal');
+        modal.classList.remove('showCloseButton', 'showModal');
+    }
+
+    // 示例用法
+    openModal('This is a custom alert!');
+
+
+    function downloadVideo() {
+        const videoUrl = document.getElementById('videoUrl').value;
+        const videoFilePath = document.getElementById('videoFilePath').value;
+        const downloadButton = document.getElementById('downloadVideoButton');
+
+        if (!videoUrl || !videoFilePath) {
+            alert('Please enter video URL and file name.');
+            return;
+        }
+
+        // 禁用按钮，显示加载状态
+        downloadButton.disabled = true;
+        downloadButton.innerHTML = 'Downloading...';
+
+        fetch('/download_video', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                chat_id: chatId,
+                videoUrl: videoUrl,
+                videoFilePath: videoFilePath
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                // 你可以在此处处理响应数据
+                // const chatBox = document.getElementById('chatBox');
+                // chatBox.innerHTML = '';
+                console.log(data);
+                openModal(data.message)
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            })
+            .finally(() => {
+                // 启用按钮，恢复原始状态
+                downloadButton.disabled = false;
+                downloadButton.innerHTML = 'Download Video';
+            });
+    }
+
+    function downloadMusic() {
+        const musicUrl = document.getElementById('musicUrl').value;
+        const musicFilePath = document.getElementById('musicFilePath').value;
+        const downloadButton = document.getElementById('downloadMusicButton');
+
+        if (!musicUrl || !musicFilePath) {
+            alert('Please enter video URL and file name.');
+            return;
+        }
+
+        // 禁用按钮，显示加载状态
+        downloadButton.disabled = true;
+        downloadButton.innerHTML = 'Downloading...';
+
+        fetch('/download_music', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                chat_id: chatId,
+                musicUrl: musicUrl,
+                musicFilePath: musicFilePath
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                // 你可以在此处处理响应数据
+                // const chatBox = document.getElementById('chatBox');
+                // chatBox.innerHTML = '';
+                console.log(data);
+                openModal(data.message)
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            })
+            .finally(() => {
+                // 启用按钮，恢复原始状态
+                downloadButton.disabled = false;
+                downloadButton.innerHTML = 'Download Music';
+            });
     }
 
 </script>

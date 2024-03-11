@@ -6,6 +6,7 @@ from langchain.tools import tool
 import os
 import subprocess
 import yt_dlp
+from app.common.error import BizException
 
 
 class YoutubeSearch:
@@ -61,6 +62,33 @@ class YoutubeSearch:
             logging.info(f'Error: {e}')
         return file_path
 
+    def download_youtube_video_for_web(url: str, video_path: str):
+        try:
+            # 设置下载选项
+            options = {
+                'format': '18',
+                # 'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+                'outtmpl': f'{video_path}/%(title)s.%(ext)s',
+            }
+
+            # 创建yt-dlp对象
+            ydl = yt_dlp.YoutubeDL(params=options)
+
+            # 下载视频
+            logging.info(f'Downloading: {url}...')
+            ydl.download([url])
+            logging.info('Download completed!')
+
+            # 获取下载后的文件路径
+            file_info = ydl.extract_info(url, download=False)
+            file_path = ydl.prepare_filename(file_info)
+
+            return file_path
+
+        except Exception as e:
+            logging.info(f'Error: {e}')
+            raise BizException(message=f"下载Youtube视频时报错->{e}")
+
     def play_video(video_path: str):
         """
         使用系统默认播放器播放视频
@@ -91,4 +119,5 @@ class YoutubeSearch:
 if __name__ == "__main__":
     # Replace with the video you want to search for
     # YoutubeSearch.search_and_play({'video_name': "Never gonna give you up"})
-    YoutubeSearch.search_and_download("Never gonna give you up")
+    # YoutubeSearch.search_and_download("Never gonna give you up")
+    YoutubeSearch.download_youtube_video_for_web("https://www.youtube.com/watch?v=qN4ooNx77u0","/Users/viking/ai/develope/ning_agent/app/agent_openai/tools")
