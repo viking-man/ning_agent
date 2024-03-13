@@ -14,8 +14,8 @@ def dispatch(chat: str = "", chat_history: str = ""):
     return content
 
 
-def download_youtube_video(video_url: str, video_path: str):
-    return YoutubeSearch.download_youtube_video_for_web(video_url, video_path)
+def download_youtube_video(video_url: str, video_path: str, video_quality: str):
+    return YoutubeSearch.download_youtube_video_for_web(video_url, video_path, video_quality)
 
 
 def download_spotify_music(music_url: str, music_path: str):

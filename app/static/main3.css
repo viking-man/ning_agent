@@ -234,6 +234,10 @@ label, select, button {
     margin-right: 10px;
 }
 
+#downloadVideoButton{
+    margin-top: 10px;
+}
+
 #videoUrl,
 #musicUrl,
 #videoFilePath,

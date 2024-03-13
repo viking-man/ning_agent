@@ -62,11 +62,20 @@ class YoutubeSearch:
             logging.info(f'Error: {e}')
         return file_path
 
-    def download_youtube_video_for_web(url: str, video_path: str):
+    def download_youtube_video_for_web(url: str, video_path: str, video_quality: str):
         try:
             # 设置下载选项
+            if video_quality == 'SuperHigh':
+                video_quality = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
+            elif video_quality == 'High':
+                video_quality = '137'
+            elif video_quality == 'Medium':
+                video_quality = '22'
+            else:
+                video_quality = '18'
+
             options = {
-                'format': '18',
+                'format': video_quality,
                 # 'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
                 'outtmpl': f'{video_path}/%(title)s.%(ext)s',
             }
@@ -120,4 +129,5 @@ if __name__ == "__main__":
     # Replace with the video you want to search for
     # YoutubeSearch.search_and_play({'video_name': "Never gonna give you up"})
     # YoutubeSearch.search_and_download("Never gonna give you up")
-    YoutubeSearch.download_youtube_video_for_web("https://www.youtube.com/watch?v=qN4ooNx77u0","/Users/viking/ai/develope/ning_agent/app/agent_openai/tools")
+    YoutubeSearch.download_youtube_video_for_web("https://www.youtube.com/watch?v=qN4ooNx77u0",
+                                                 "/Users/viking/ai/develope/ning_agent/app/agent_openai/tools")

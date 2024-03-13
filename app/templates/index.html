@@ -63,6 +63,15 @@
                     <label for="videoFilePath">Video File Path:</label>
                     <input type="text" id="videoFilePath" placeholder="Enter Video path name" required>
 
+                    <div>
+                        <label for="videoQuality">Video Quality:</label>
+                        <select id="videoQuality">
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="SuperHigh">SuperHigh</option>
+                        </select>
+                    </div>
                     <button id="downloadVideoButton" type="button" onclick="downloadVideo()">Download Video</button>
                 </form>
             </div>
@@ -545,6 +554,7 @@
     function downloadVideo() {
         const videoUrl = document.getElementById('videoUrl').value;
         const videoFilePath = document.getElementById('videoFilePath').value;
+        const videoQuality = document.getElementById('videoQuality').value;
         const downloadButton = document.getElementById('downloadVideoButton');
 
         if (!videoUrl || !videoFilePath) {
@@ -565,7 +575,8 @@
                 user_id: userId,
                 chat_id: chatId,
                 videoUrl: videoUrl,
-                videoFilePath: videoFilePath
+                videoFilePath: videoFilePath,
+                videoQuality: videoQuality
             })
         })
             .then(response => response.json())

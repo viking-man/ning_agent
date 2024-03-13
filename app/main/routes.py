@@ -141,12 +141,15 @@ def download_video():
     data = request.get_json()
     video_url = data.get('videoUrl')
     video_file_path = data.get('videoFilePath')
+    videoQuality = data.get('videoQuality')
     if not video_url:
         raise ParameterException("video_url")
+    if not videoQuality:
+        raise ParameterException("videoQuality")
     if not video_file_path or not path.exists(video_file_path):
         raise ParameterException("video_path")
 
-    video_file = agent_facade.download_youtube_video(video_url, video_file_path)
+    video_file = agent_facade.download_youtube_video(video_url, video_file_path, videoQuality)
 
     return jsonify({'message': f'Youtube video download onto {video_file} successfully'})
 
