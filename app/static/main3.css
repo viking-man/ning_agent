@@ -186,17 +186,42 @@ label, select, button {
     background-color: #45a049;
 }
 
-.download-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 80%;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    padding: 20px;
+/*字幕翻译模块*/
+
+/*#translationContent {*/
+/*    margin-bottom: 20px;*/
+/*    width: 100%;*/
+/*}*/
+
+#translationContent input:not(#useSubtitleCheckbox) {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 2px solid #3498db;
     border-radius: 5px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
+
+#translationSelector,
+#translationSubtitle {
+    margin-bottom: 20px;
+    width: calc(100% - 20px);
+}
+
+#translationContent button {
+    font-weight: bold;
+    text-align: center;
+    padding: 10px 20px;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+#translationContent button:hover {
+    background-color: #45a049;
+}
+
 
 #downloadVideoForm,
 #downloadMusicForm {
@@ -251,14 +276,26 @@ label, select, button {
     margin-bottom: 20px;
 }
 
-.download-header {
+.translation-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.download-header, .translation-header {
     font-size: 20px;
     font-weight: bold;
     margin-bottom: 10px;
     cursor: pointer;
 }
 
-.download-content {
+.download-content, .translation-content {
     width: 100%;
 }
 

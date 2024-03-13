@@ -1,3 +1,4 @@
+import logging
 import os.path
 
 from flask import Flask, render_template, request, jsonify, send_file
@@ -12,6 +13,7 @@ from pathlib import Path
 from app.agent_openai import agent_facade
 from app.common.error import ParameterException
 from os import path
+from app.open_ai.subtitle_translator import SubtitleTranslator
 
 
 @bp.route('/')
@@ -162,6 +164,32 @@ def download_music():
     music_file = agent_facade.download_spotify_music(musicUrl, musicFilePath)
 
     return jsonify({'message': f'Spotify music download onto {music_file} successfully'})
+
+
+@bp.route('/subtitle_translate', methods=['POST'])
+def subtitle_translate():
+    data = request.get_json()
+    logging.info(f"subtitle_translate request params->{data}")
+
+    translationVideoFile = data.get('translationVideoFile')
+    translationLanguage = data.get('translationLanguage')
+    translationSubtitleFile = data.get('translationSubtitleFile')
+    translationModel = data.get('translationModel')
+    if not translationVideoFile or not path.exists(translationVideoFile):
+        raise ParameterException("translationVideoFile")
+    if not translationLanguage:
+        raise ParameterException("translationLanguage")
+
+    if not translationModel:
+        translationModel = "small"
+
+    translator = SubtitleTranslator(translationModel, translationVideoFile, translationLanguage)
+    if not translationSubtitleFile:
+        completed_video = translator.transcribe()
+    else:
+        completed_video = translator.add_subtitle(translationVideoFile, translationSubtitleFile)
+
+    return jsonify({'message': f'Subtitle add to {completed_video} successfully'})
 
 
 def get_files_sorted_by_creation_time(directory):
