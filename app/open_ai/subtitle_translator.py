@@ -143,7 +143,7 @@ class SubtitleTranslator:
         suffix = path.suffix
         output_dir = str(path.absolute().parent)
 
-        output = os.path.join(output_dir, input_name + "_subtitle" + suffix)
+        output = os.path.join(output_dir, input_name + "_subtitle_" + self.target_lang + suffix)
         self.add_subtitles(path, subtitle_path, output)
 
         return output

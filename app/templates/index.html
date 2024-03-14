@@ -404,7 +404,7 @@
             })
             .catch(error => {
                 console.error('Error fetching image list:', error);
-                openModal(error);
+                openModal(error.message || 'An error occurred while processing your request.');
             });
     }
 
@@ -428,7 +428,7 @@
             })
             .catch(error => {
                 console.error('Error fetching image:', error);
-                openModal(error);
+                openModal(error.message || 'An error occurred while processing your request.');
             });
     }
 
@@ -507,8 +507,8 @@
                 document.body.removeChild(a);
             })
             .catch(error => {
-                console.error('Error fetching image for download:', error);
-                openModal(error);
+                console.error('Error fetching image for download:', error.message);
+                openModal(error.message || 'An error occurred while processing your request.');
             });
     }
 
@@ -589,7 +589,7 @@
             })
             .catch(error => {
                 console.error('Error fetching data:', error);
-                openModal(error);
+                openModal(error.message || 'An error occurred while processing your request.');
             })
             .finally(() => {
                 // 启用按钮，恢复原始状态
@@ -634,7 +634,7 @@
             })
             .catch(error => {
                 console.error('Error fetching data:', error);
-                openModal(error);
+                openModal(error.message || 'An error occurred while processing your request.');
             })
             .finally(() => {
                 // 启用按钮，恢复原始状态
@@ -703,7 +703,14 @@
                 translationModel: translationModel
             })
         })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.error);
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 // 你可以在此处处理响应数据
                 // const chatBox = document.getElementById('chatBox');
@@ -713,7 +720,7 @@
             })
             .catch(error => {
                 console.error('Error fetching data:', error);
-                openModal(error);
+                openModal(error.message || 'An error occurred while processing your request.');
             })
             .finally(() => {
                 // 启用按钮，恢复原始状态
