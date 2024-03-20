@@ -12,6 +12,7 @@ import time
 from pathlib import Path
 from app.agent_openai import agent_facade
 from app.common.error import ParameterException
+from app.common.utils.file_utils import delete_file
 from os import path
 from app.open_ai.subtitle_translator import SubtitleTranslator
 
@@ -214,6 +215,23 @@ def get_files_sorted_by_creation_time(directory):
     except Exception as e:
         print(f"Error getting files: {e}")
         return None
+
+@bp.route('/delete_image', methods=['DELETE'])
+def delete_image():
+    file_name = request.args.get('fileName')
+
+    # 构造完整的文件路径
+    file_path = os.path.join(os.path.dirname(__file__), f"../files/image/{file_name}")
+    if not os.path.exists(file_path):
+        raise ParameterException("file_name")
+
+    # 删除图片逻辑
+    delete_result = delete_file(file_path)
+
+    if delete_result:
+        return jsonify({'message': f'Image->{file_name} deleted successfully'})
+    else:
+        return jsonify({'message': 'Failed to delete image'}, 500)
 
 
 @bp.errorhandler(Exception)
