@@ -1,7 +1,7 @@
 import os
 
 ZHIPU_API_KEY="be6fb38cd1fb941c9e9b7504056e0383.GmDpKZ5JB4Hr5qfF"
-MODEL_NAME = 'chatglm'
+MODEL_NAME = 'llama3'
 REMOTE_MODEL_PATH = ''
 LOCAL_MODEL_PATH=os.path.join("G:\data\\transformers\source\chatglm\model")
 LOCAL_CONTENT = os.path.join(os.path.dirname(__file__), "docs")

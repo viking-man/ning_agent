@@ -10,14 +10,14 @@ from langchain.prompts import PromptTemplate
 import torch
 from langchain import HuggingFacePipeline
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, pipeline
-from app.agent_chatglm.agent_config import LOCAL_MODEL_PATH
+from app.agent_llama.agent_config import LOCAL_MODEL_PATH
 
 
 class CustomLLM(LLM):
     logging: bool = False
     output_keys: List[str] = ["output"]
 
-    llm_type: str = "chatglm3"
+    llm_type: str = "llama3"
 
     @property
     def _llm_type(self) -> str:
@@ -59,7 +59,7 @@ class CustomLLM(LLM):
         # question = "北京和上海两座城市有什么不同？"
         result = llm(prompt)
 
-        if self._llm_type == "chatglm":
+        if self._llm_type == "llama3":
             self.log('<--------chatglm------------')
             self.log(result)
             return result

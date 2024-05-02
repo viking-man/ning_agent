@@ -5,11 +5,11 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import UnstructuredFileLoader
 # from chinese_text_splitter import ChineseTextSplitter
 from langchain.vectorstores import FAISS
-from app.agent_chatglm.agent_llm import CustomLLM
+from app.agent_llama.agent_llm import CustomLLM
 import datetime
 import torch
 from tqdm import tqdm
-from app.agent_chatglm.agent_config import *
+from app.agent_llama.agent_config import *
 from langchain import PromptTemplate
 from langchain.memory import ConversationSummaryBufferMemory
 from langchain.chains import ConversationChain

@@ -1,6 +1,6 @@
 import os
 
-MODEL_NAME = 'chatglm'
+MODEL_NAME = 'llama3'
 REMOTE_MODEL_PATH = ''
 LOCAL_MODEL_PATH = os.path.join("G:\data\\transformers\source\chatglm\model")
 LOCAL_CONTENT = os.path.join(os.path.dirname(__file__), "../../resources/docs")

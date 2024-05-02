@@ -2,10 +2,10 @@ import torch.cuda
 import torch.backends
 from typing import Any, List, Dict, Union, Mapping, Optional
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-from app.agent_chatglm.agent_llm import CustomLLM
-from app.agent_chatglm.agent_core import DeepAgent
-from app.agent_chatglm.agent_db import LocalDocQA
-from app.agent_chatglm.agent_config import *
+from app.agent_llama.agent_llm import CustomLLM
+from app.agent_llama.agent_core import DeepAgent
+from app.agent_llama.agent_db import LocalDocQA
+from app.agent_llama.agent_config import *
 EMBEDDING_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 
 deep_agent = DeepAgent()
