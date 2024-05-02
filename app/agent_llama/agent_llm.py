@@ -1,18 +1,23 @@
 from typing import Any, List, Dict, Mapping, Optional
+import json
 
 from langchain.callbacks.manager import CallbackManagerForLLMRun
+from langchain.requests import TextRequestsWrapper
 from langchain.llms.base import LLM
-from langchain import HuggingFacePipeline
-from app.agent_llama.llama_config import LLAMA_MODEL_PATH
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from langchain.chains import LLMChain
+from langchain.llms import ChatGLM
+from langchain.prompts import PromptTemplate
 import torch
+from langchain import HuggingFacePipeline
+from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, pipeline
+from app.agent_chatglm.agent_config import LOCAL_MODEL_PATH
 
 
-class LlamaLLM(LLM):
-    logging: bool = True
+class CustomLLM(LLM):
+    logging: bool = False
     output_keys: List[str] = ["output"]
 
-    llm_type: str = "llama3"
+    llm_type: str = "chatglm3"
 
     @property
     def _llm_type(self) -> str:
@@ -35,12 +40,12 @@ class LlamaLLM(LLM):
         self.log(prompt)
         print(f"prompt{prompt}")
 
-        tokenizer = AutoTokenizer.from_pretrained(LLAMA_MODEL_PATH, trust_remote_code=True)
+        tokenizer = AutoTokenizer.from_pretrained(LOCAL_MODEL_PATH, trust_remote_code=True)
         model = AutoModelForCausalLM.from_pretrained(
-            LLAMA_MODEL_PATH, torch_dtype=torch.float16, trust_remote_code=True, device_map="auto"
+            LOCAL_MODEL_PATH, torch_dtype=torch.float16, trust_remote_code=True, device_map="auto"
         )
 
-        max_new_tokens = 512
+        max_new_tokens = 256
         text_pipeline = pipeline(
             "text-generation",
             model=model,
@@ -52,7 +57,14 @@ class LlamaLLM(LLM):
 
         llm = HuggingFacePipeline(pipeline=text_pipeline, model_kwargs={"temperature": 0})
         # question = "北京和上海两座城市有什么不同？"
-        return llm(prompt)
+        result = llm(prompt)
+
+        if self._llm_type == "chatglm":
+            self.log('<--------chatglm------------')
+            self.log(result)
+            return result
+        else:
+            return "不支持该类型的 llm"
 
     @property
     def _identifying_params(self) -> Mapping[str, Any]:

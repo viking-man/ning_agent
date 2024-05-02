@@ -1,6 +1,5 @@
 from flask import Blueprint
 
-# 查询/唱歌/绘画
-bp = Blueprint('agent_llama', __name__)
+bp = Blueprint('agent_chatglm', __name__)
 
-from app.agent_llama import agent_facade
+from app.agent_chatglm import agent_llm, agent_facade, agent_config, agent_core, agent_db, agent_template, agent_web_search
